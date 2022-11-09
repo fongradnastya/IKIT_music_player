@@ -1,0 +1,294 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon"
+          href="{% static 'music/img/icon.png' %}"
+          type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Krona+One&family=Montserrat:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,100&family=Montserrat:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet"
+          href="{% static 'music/css/tracks.css' %}">
+    <title>Tracks</title>
+</head>
+<body>
+<div class="wrapper">
+    <header class="header">
+                <div class="header__container container">
+                    <a href="{% url 'home' %}" class="header__logo">
+                        <img src="{% static 'music/img/logo.png' %}" alt="IKIT music">
+                    </a>
+                    <nav class="header__menu menu">
+                        <ul class="menu__list">
+                            <li>
+                                <a href="{% url 'home' %}" class="menu__link">Home</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'tracks' %}" class="menu__link current__item">Tracks</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'home' %}" class="menu__link ">Playlists</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'playlist' 5 %}" class="menu__link">Favorite</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <a href="#" class="header__user">
+                        <img src="{% static 'music/img/user.png' %}" alt="profile">
+                    </a>
+                </div>
+            </header>
+    <main class="page">
+        <section class="page__main-block main-block">
+            <div class="main-block__container container">
+                <div class="main-block__body">
+                    <h1 class="main-block__title">
+                        Music
+                    </h1>
+                    <div class="slider">
+                        <div class="slider__item">
+                                {% for composition in compositions|slice:"0:3"%}
+                                    <div class="item__track">
+                                        <div class="item__container">
+                                            <div class="play__composition item__composition">
+                                                <div class="play__cover">
+                                                    <div class="play__image">
+                                                        {% if composition.cover %}
+                                                            <img src="{{ composition.cover.url }}" alt="yttt">
+                                                        {% else %}
+                                                            <img src="{% static 'music/img/recommended.png' %}" alt="">
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="play__button">
+                                                        <a href="{% url 'play' composition.id %}" class="track__link">
+                                                            <img src="{% static 'music/img/tracks/play 3.png' %}" alt="">
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="play__track">
+                                                <div class="play__name">
+                                                    {{ composition.name }}
+                                                </div>
+                                                <div class="play__author">
+                                                    {{ composition.author }}
+                                                </div>
+                                            </div>
+                                                <div class="buttons">
+                                            <a href="#" class="button__plus">
+                                                <img src="{% static 'music/img/tracks/plus.png' %}"
+                                                     alt="">
+                                            </a>
+                                            <a href="#" class="button__like">
+                                                <img src="{% static 'music/img/tracks/like.png' %}"
+                                                     alt="">
+                                            </a>
+                                        </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        <div class="slider__item">
+                                {% for composition in compositions|slice:"3:6"%}
+                                    <div class="item__track">
+                                        <div class="item__container">
+                                            <div class="play__composition item__composition">
+                                                <div class="play__cover">
+                                                    <div class="play__image">
+                                                        {% if composition.cover %}
+                                                            <img src="{{ composition.cover.url }}" alt="yttt">
+                                                        {% else %}
+                                                            <img src="{% static 'music/img/recommended.png' %}" alt="">
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="play__button">
+                                                        <a href="{% url 'play' composition.id %}" class="track__link">
+                                                            <img src="{% static 'music/img/tracks/play 3.png' %}" alt="">
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="play__track">
+                                                <div class="play__name">
+                                                    {{ composition.name }}
+                                                </div>
+                                                <div class="play__author">
+                                                    {{ composition.author }}
+                                                </div>
+                                            </div>
+                                                <div class="buttons">
+                                            <a href="#" class="button__plus">
+                                                <img src="{% static 'music/img/tracks/plus.png' %}"
+                                                     alt="">
+                                            </a>
+                                            <a href="#" class="button__like">
+                                                <img src="{% static 'music/img/tracks/like.png' %}"
+                                                     alt="">
+                                            </a>
+                                        </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        <div class="slider__item">
+                                {% for composition in compositions|slice:"6:9"%}
+                                    <div class="item__track">
+                                        <div class="item__container">
+                                            <div class="play__composition item__composition">
+                                                <div class="play__cover">
+                                                    <div class="play__image">
+                                                        {% if composition.cover %}
+                                                            <img src="{{ composition.cover.url }}" alt="yttt">
+                                                        {% else %}
+                                                            <img src="{% static 'music/img/recommended.png' %}" alt="">
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="play__button">
+                                                        <a href="{% url 'play' composition.id %}" class="track__link">
+                                                            <img src="{% static 'music/img/tracks/play 3.png' %}" alt="">
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="play__track">
+                                                <div class="play__name">
+                                                    {{ composition.name }}
+                                                </div>
+                                                <div class="play__author">
+                                                    {{ composition.author }}
+                                                </div>
+                                            </div>
+                                                <div class="buttons">
+                                            <a href="#" class="button__plus">
+                                                <img src="{% static 'music/img/tracks/plus.png' %}"
+                                                     alt="">
+                                            </a>
+                                            <a href="#" class="button__like">
+                                                <img src="{% static 'music/img/tracks/like.png' %}"
+                                                     alt="">
+                                            </a>
+                                        </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        <div class="slider__item">
+                                {% for composition in compositions|slice:"9:12"%}
+                                    <div class="item__track">
+                                        <div class="item__container">
+                                            <div class="play__composition item__composition">
+                                                <div class="play__cover">
+                                                    <div class="play__image">
+                                                        {% if composition.cover %}
+                                                            <img src="{{ composition.cover.url }}" alt="yttt">
+                                                        {% else %}
+                                                            <img src="{% static 'music/img/recommended.png' %}" alt="">
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="play__button">
+                                                        <a href="{% url 'play' composition.id %}" class="track__link">
+                                                            <img src="{% static 'music/img/tracks/play 3.png' %}" alt="">
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="play__track">
+                                                <div class="play__name">
+                                                    {{ composition.name }}
+                                                </div>
+                                                <div class="play__author">
+                                                    {{ composition.author }}
+                                                </div>
+                                            </div>
+                                                <div class="buttons">
+                                            <a href="#" class="button__plus">
+                                                <img src="{% static 'music/img/tracks/plus.png' %}"
+                                                     alt="">
+                                            </a>
+                                            <a href="#" class="button__like">
+                                                <img src="{% static 'music/img/tracks/like.png' %}"
+                                                     alt="">
+                                            </a>
+                                        </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% if played %}
+            <div class="play-track">
+            <div class="play__container">
+                <audio class="audio" src="{{ played.audio.url }}"></audio>
+                <div class="play__control">
+
+                    <a href="{% url 'play' played.pk|add:'-1' %}" class="play__previous">
+                        <img src="{% static 'music/img/play/previos.png' %}"
+                             alt="prev">
+                    </a>
+                    <a href="#" class="play__pause">
+                        <img src="{% static 'music/img/play/play-pause 1.png' %}"
+                             alt="play">
+                    </a>
+                    <a href="{% url 'play' played.pk|add:1 %}" class="play__next">
+                        <img src="{% static 'music/img/play/next.png' %}"
+                             alt="next">
+                    </a>
+                    <a href="#" class="play__list">
+                        <img src="{% static 'music/img/play/list 1.png' %}"
+                             alt="playlist">
+                    </a>
+                </div>
+                <div class="play__composition">
+                    <div class="play__image">
+                        <img src="{{ played.cover.url }}"
+                             alt="">
+                    </div>
+                    <div class="play__track">
+                        <div class="track__name">
+                            {{ played.name }}
+                        </div>
+                        <div class="track__author">
+                            {{ played.author }}
+                        </div>
+                    </div>
+                </div>
+                <div class="play__progress">
+                    <div class="play__progress-container">
+                        <div class="play__line"></div>
+                        <div class="play__curr-progress"></div>
+                    </div>
+                </div>
+                <div class="play__add">
+                    <a href="#" class="play__downoload">
+                        <img src="{% static 'music/img/play/download 1.png' %}"
+                             alt="">
+                    </a>
+                    <a href="#" class="play__plus">
+                        <img src="{% static 'music/img/play/plus-small 1.png' %}"
+                             alt="">
+                    </a>
+                    <a href="#" class="play__like">
+                        <img src="{% static 'music/img/play/heart 1.png' %}"
+                             alt="">
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script src="{% static 'music/JS/slick.min.js' %}"></script>
+    <script src="{% static 'music/JS/tracks.js' %}"></script>
+    <script src="{% static 'music/JS/play.js' %}"></script>
+</div>
+</body>
+</html>

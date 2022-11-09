@@ -1,0 +1,429 @@
+/* Обнуление стилей */
+
+* {
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+:focus, :active {
+    outline: none;
+}
+
+a:focus, a:active {
+    outline: none;
+}
+
+nav, footer, header, aside {
+    display: block;
+}
+
+html, body {
+    min-height: 100vh;
+    width: 100%;
+    line-height: 1;
+    font-size: 14px;
+    -ms-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    background: #FAFAFA;
+}
+
+input, button, textarea {
+    font-family: inherit;
+}
+
+input::-ms-clear {
+    display: none;
+}
+
+button {
+    cursor: pointer;
+}
+
+button::-moz-focus-inner {
+    padding: 0;
+    border: 0;
+}
+
+a, a:visited {
+    text-decoration: none;
+}
+
+ul li {
+    list-style: none;
+}
+
+img {
+    vertical-align: top;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+/* Начало css кода */
+body {
+    height: 100%;
+    line-height: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    font-family: 'Lato', sans-serif;
+    background: url("../img/background.png") no-repeat center center fixed;
+    background-size: cover;
+}
+
+.wrapper {
+    min-height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 1046px;
+    margin: 0 auto;
+    padding: 0 15px;
+    box-sizing: content-box;
+}
+
+.main-block__container{
+    max-width: 950px;
+}
+
+.header {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    background: linear-gradient(180deg, #180F30 0%, rgba(31, 15, 48, 0.38) 100%);
+}
+
+.header__container {
+    display: flex;
+    min-height: 104px;
+    align-items: center;
+}
+
+.header__logo{
+    margin-left: 50px;
+}
+
+.header__user {
+    margin-left: 250px;
+    justify-self: flex-end;
+}
+
+.header__menu {
+    margin-left: 133px;
+    padding: 5px 0;
+}
+
+.menu__list {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.menu__list li {
+    margin-right: 64px;
+}
+
+.menu__list li:last-child {
+    margin-right: 0;
+}
+
+.menu__link {
+    color:#5A72B0;
+    font-weight: 600;
+    line-height: calc(24 / 14 * 100%);
+    letter-spacing: 0.2px;
+    font-size: 16px;
+}
+
+.menu__link:hover{
+    color: #fff;
+}
+
+.page{
+    flex: 1 1 auto;
+}
+
+.main-block {
+    width: 100%;    position: relative;
+}
+
+.main-block__body {
+    padding: 200px 0 191px 0;
+    position: relative;
+    z-index: 2;
+}
+
+.main-block__image {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.item__track{
+    background: url("../img/tracks/composition_bkg.png") 0 0 no-repeat;
+}
+
+.item__track:hover{
+    background: url("../img/tracks/composition_dark.png") 0 0 no-repeat;
+}
+
+
+.item__container{
+    padding: 12px;
+}
+.play__image {
+    width: 50px;
+    height: 50px;
+    position: relative;
+}
+
+.play__container{
+    padding: 12px 40px 25px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.play__container a {
+    margin-left: 15px;
+}
+
+.play__image img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+}
+
+.play__composition{
+    display: flex;
+    align-items: center;
+    margin-left: 42px;
+}
+
+.item__composition{
+    margin-left: 0;
+}
+
+.play__track{
+    margin-left: 14px;
+}
+
+.play__name{
+    font-weight: 100;
+    color: #06046C;
+    line-height: 20px;
+}
+
+.play__author{
+    color: #06046C;
+    line-height: 20px;
+    font-size: 12px;
+}
+
+.play__button { 
+    position: absolute;
+    top: 35%;
+    left: 35%;
+    width: 13px;
+    display: none;
+}
+
+.play__cover{
+    position: relative;
+}
+
+.item__container:hover .play__button{
+    display: block;
+}
+
+.play__duration{
+    margin-left: 20px;
+}
+
+.item__container:hover .play__duration{
+    display: none;
+}
+
+.buttons{
+    display: none;
+}
+
+.item__container:hover .buttons {
+    display: block;
+    margin: 0 10px;
+}
+
+.item__container:hover .button__like{
+    margin-right: 7px;
+}
+
+.item__container:hover .play__name{
+    color: white;
+}
+
+.item__container:hover .play__author{
+    color: white;
+}
+
+.button__minus{
+    margin-top: 20px;
+}
+
+.button__plus{
+    margin-right: 5px;
+}
+
+.track__name{
+    color: #9fb0dd;
+}
+
+.track__author{
+    color: white;
+}
+
+.play__progress{
+    margin: 0 20px;
+    cursor: pointer;
+}
+
+.play__progress-container{
+    width: 240px;
+    height: 4px;
+    position: relative;
+}
+
+.play__line{
+    width: 240px;
+    height: 2px;
+    background-color: #9fb0dd;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.play__curr-progress{
+    height: 2px;
+    background-color: #366EFF;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.play-track{
+    position: absolute;
+    bottom: 40px;
+    left: 20%;
+    z-index: 10;
+    background: url("../img/Rectangle.png") 0 0 no-repeat;
+}
+
+.play__add{
+    display: flex;
+    align-items: center;
+}
+
+.slick-list{
+    overflow: hidden;
+}
+
+.slick-track {
+    display: flex;
+}
+
+.slider{
+    position: relative;
+    padding: 0 50px;
+}
+
+.slick-arrow{
+    position: absolute;
+    top: 42%;
+    z-index: 5;
+    font-size: 0;
+    width: 34px;
+    height: 34px;
+}
+
+.slick-arrow.slick-prev{
+    left: 0;
+    background: url("../img/arrow-left.png") 0 0 no-repeat;
+}
+/* Стрелка вправо */
+.slick-arrow.slick-next{
+    right: 30px;
+    background: url("../img/arrow-right.png") 0 0 no-repeat;
+}
+
+.item__track:not(:last-child){
+    margin-bottom: 10px;
+}
+
+.playlist__container{
+    display: flex;
+    justify-items: space-between;
+    align-items: center;
+}
+
+.container-sl{
+    width: 700px;
+}
+
+.current__item{
+    color:rgb(187, 191, 240)
+}
+
+.playlist__cover{
+    margin-right: 40px;
+    width: 236px;
+    height: 310px;
+    background: rgba(43, 42, 109, 0.4);
+    backdrop-filter: blur(15px);
+    border-radius: 10px;
+    padding: 25px 15px;
+}   
+
+.playlist__image{
+    margin-bottom: 15px;
+}
+
+.playlist__image img{
+    object-fit: cover;
+    height: 180px;
+    width: 180px;
+}
+
+.playlist__information{
+    margin: 0 10px;
+    display: flex;
+    align-items: end;
+}
+
+.playlist__name{
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 19px;
+    margin-bottom: 10px;
+}
+
+.playlist__description{
+    color: #9fb0dd;
+    font-size: 13px;
+}

@@ -1,0 +1,28 @@
+{% block header %}
+<header class="header">
+    <div class="header__container container">
+        <a href="#" class="header__logo">
+            <img src="{% static 'music/img/logo.png' %}" alt="IKIT music">
+        </a>
+        <nav class="header__menu menu">
+            <ul class="menu__list">
+                <li>
+                    <a href="#" class="menu__link">Home</a>
+                </li>
+                <li>
+                    <a href="tracks.html" class="menu__link">Tracks</a>
+                </li>
+                <li>
+                    <a href="index.html" class="menu__link current__item">Playlists</a>
+                </li>
+                <li>
+                    <a href="playlist.html" class="menu__link">Favorite</a>
+                </li>
+            </ul>
+        </nav>
+        <a href="#" class="header__user">
+            <img src="{% static 'music/img/user.png' %}" alt="profile">
+        </a>
+    </div>
+</header>
+{% endblock %}
