@@ -58,14 +58,15 @@
                                         </div>
                                     </div>
                                     <a href="#" class="minus-btn">
-                                        <img src="img/minus.png" alt="">
+                                        <img src="{% static 'music/img/tracks/minus.png' %}" alt="">
                                     </a>
                                 </div>
                             </div>
                             <div class="container-sl">
                                 <div class="slider">
+                                    {% for column in tracks %}
                                     <div class="slider__item">
-                                        {% for track in compositions %}
+                                        {% for track in column %}
                                             <div class="item__track">
                                                 <div class="item__container">
                                                     <div class="play__composition item__composition">
@@ -76,7 +77,7 @@
                                                             </div>
                                                             <div class="play__button">
                                                                 <a href="#" class="track__link">
-                                                                    <img src="img/tracks/play 3.png" alt="">
+                                                                    <img src="{% static 'music/img/tracks/play 3.png' %}" alt="">
                                                                 </a>
                                                             </div>
                                                         </div>
@@ -89,11 +90,11 @@
                                                             </div>
                                                         </div>
                                                         <div class="buttons">
-                                                            <a href="#" class="button__plus">
-                                                                <img src="img/tracks/plus.png" alt="">
+                                                            <a href="#" class="button__minus">
+                                                                <img src="{% static 'music/img/tracks/minus.png' %}" alt="">
                                                             </a>
                                                             <a href="#" class="button__like">
-                                                                <img src="img/tracks/like.png" alt="">
+                                                                <img src="{% static 'music/img/tracks/like.png' %}" alt="">
                                                             </a>
                                                         </div>
                                                     </div>
@@ -101,62 +102,73 @@
                                             </div>
                                         {% endfor %}
                                     </div>
+                                    {% endfor %}
                                 </div>
                             </div> 
                         </div>
                     </div>
                 </div>
             </section>
-            <div class="play-track">
+            {% if composition %}
+                <div class="play-track">
                     <div class="play__container">
-                        <audio class="audio" src="audio/Lana_Del_Rey_-_Young_And_Beautiful_(musmore.com) (1).mp3"></audio>
+                        <audio class="audio" src="{{ composition.audio.url }}"></audio>
                         <div class="play__control">
-
-                            <a href="#" class="play__previous">
-                                <img src="{% static 'music/img/play/previos.png' %}" alt="prev">
-                            </a>
-                            <a href="#" class="play__pause">
-                                <img src="{% static 'music/img/play/play-pause 1.png' %}" alt="play">
-                            </a>
-                            <a href="#" class="play__next">
-                                <img src="{% static 'music/img/play/next.png' %}" alt="next">
-                            </a>
-                            <a href="#" class="play__list">
-                                <img src="{% static 'music/img/play/list 1.png' %}" alt="playlist">
-                            </a>
-                        </div>
+                    {{ size }}
+                    <a href="" class="play__previous">
+                        <img src="{% static 'music/img/play/previos.png' %}"
+                             alt="prev">
+                    </a>
+                    <a href="#" class="play__pause">
+                        <img src="{% static 'music/img/play/play-pause 1.png' %}"
+                             alt="play">
+                    </a>
+                    <a href="" class="play__next">
+                        <img src="{% static 'music/img/play/next.png' %}"
+                             alt="next">
+                    </a>
+                    <a href="#" class="play__list">
+                        <img src="{% static 'music/img/play/list 1.png' %}"
+                             alt="playlist">
+                    </a>
+                </div>
                         <div class="play__composition">
-                            <div class="play__image">
-                                <img src="{% static 'music/img/recommended.png' %}" alt="">
-                            </div>
-                            <div class="play__track">
-                                <div class="track__name">
-                                    Young And Beautiful
-                                </div>
-                                <div class="track__author">
-                                    Lana Del Rey
-                                </div>
-                            </div>
+                    <div class="play__image">
+                        <img src="{{ composition.cover.url }}"
+                             alt="">
+                    </div>
+                    <div class="play__track">
+                        <div class="track__name">
+                            {{ composition.name }}
                         </div>
-                        <div class="play__progress">
-                            <div class="play__progress-container">
-                                <div class="play__line"></div>
-                                <div class="play__curr-progress"></div>
-                            </div>
-                        </div>
-                        <div class="play__add">
-                            <a href="#" class="play__downoload">
-                                <img src="{% static 'music/img/play/download 1.png' %}" alt="">
-                            </a>
-                            <a href="#" class="play__plus">
-                                <img src="{% static 'music/img/play/plus-small 1.png' %}" alt="">
-                            </a>
-                            <a href="#" class="play__like">
-                                <img src="{% static 'music/img/play/heart 1.png' %}" alt="">
-                            </a>
+                        <div class="track__author">
+                            {{ composition.author }}
                         </div>
                     </div>
                 </div>
+                        <div class="play__progress">
+                    <div class="play__progress-container">
+                        <div class="play__line"></div>
+                        <div class="play__curr-progress"></div>
+                    </div>
+                </div>
+                        <div class="play__add">
+                    <a href="#" class="play__downoload">
+                        <img src="{% static 'music/img/play/download 1.png' %}"
+                             alt="">
+                    </a>
+                    <a href="#" class="play__plus">
+                        <img src="{% static 'music/img/play/plus-small 1.png' %}"
+                             alt="">
+                    </a>
+                    <a href="#" class="play__like">
+                        <img src="{% static 'music/img/play/heart 1.png' %}"
+                             alt="">
+                    </a>
+                </div>
+                    </div>
+                </div>
+            {% endif %}
         </main>
         <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
         <script src="{% static 'music/JS/slick.min.js' %}"></script>
