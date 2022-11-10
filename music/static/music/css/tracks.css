@@ -383,3 +383,25 @@ body {
     color:rgb(187, 191, 240)
 }
 
+.playlists{
+    background: rgba(112, 195, 255, 0.53);
+    border-radius: 10px;
+    max-width: 200px;
+    position: absolute;
+    top: 200px;
+    right: 0;
+    z-index: 10;
+}
+
+.playlists_container{
+    margin: 20px;
+}
+
+.list-item{
+    padding: 10px 10px;
+}
+
+.list-item:hover{
+    background-color: #84a3ff;
+    border-radius: 5px;
+}

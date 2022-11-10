@@ -51,6 +51,17 @@
                     <h1 class="main-block__title">
                         Music
                     </h1>
+                    <div class="playlists">
+                        <div class="playlists_container">
+                            {% for pl in playlists %}
+                                <div class="list-item">
+                                    <a href="" class="list-link">
+                                        {{ pl.name }}
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                     <div class="slider">
                         <div class="slider__item">
                                 {% for composition in compositions|slice:"0:3"%}

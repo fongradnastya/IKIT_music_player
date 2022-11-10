@@ -4,14 +4,14 @@ from .models import *
 
 
 class CompositionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'author', 'cover', 'is_played', 'is_liked')
+    list_display = ('id', 'name', 'author', 'cover', 'is_played', 'is_liked',
+                    'order')
     list_display_links = ('id', 'name', 'author')
     search_fields = ('name', 'author')
 
 
 class PlaylistAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'cover', 'description', 'is_default',
-                    'length')
+    list_display = ('id', 'name', 'cover', 'description', 'is_default')
 
 
 admin.site.register(Composition, CompositionAdmin)

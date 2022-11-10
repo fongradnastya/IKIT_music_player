@@ -10,11 +10,7 @@ class Composition(models.Model):
     is_played = models.BooleanField(default=False)
     is_liked = models.BooleanField(default=False)
 
-    def play(self):
-        self.is_played = True
-
-    def stop(self):
-        self.is_played = False
+    order = models.PositiveSmallIntegerField(default=0, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}, {self.author}"
@@ -215,5 +211,4 @@ class Playlist(models.Model):
     cover = models.ImageField(upload_to="photos/%Y/%m/%d/", null=True)
     description = models.CharField(max_length=500, null=True)
     is_default = models.BooleanField(default=False)
-    length = models.IntegerField(default=0)
-    compositions = models.ManyToManyField(Composition, null=True, blank=True)
+    compositions = models.ManyToManyField(Composition)
