@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Krona+One&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,100&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'music/css/playlist.css' %}">
-    <title>{{ playlist.id }}</title>
+    <title>{{ playlist.name }}</title>
 </head>
 <body>
     <div class="wrapper">
@@ -26,12 +26,21 @@
                             <li>
                                 <a href="{% url 'tracks' %}" class="menu__link">Tracks</a>
                             </li>
+                            {% if not playlist.name == "Favorite" %}
                             <li>
                                 <a href="{% url 'home' %}" class="menu__link current__item">Playlists</a>
                             </li>
                             <li>
                                 <a href="{% url 'playlist' 5 %}" class="menu__link">Favorite</a>
                             </li>
+                            {% else %}
+                            <li>
+                                <a href="{% url 'home' %}" class="menu__link">Playlists</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'playlist' 5 %}" class="menu__link current__item">Favorite</a>
+                            </li>
+                            {% endif %}
                         </ul>
                     </nav>
                     <a href="#" class="header__user">
@@ -57,9 +66,11 @@
                                             {{ playlist.description }}
                                         </div>
                                     </div>
-                                    <a href="#" class="minus-btn">
-                                        <img src="{% static 'music/img/tracks/minus.png' %}" alt="">
-                                    </a>
+                                    {% if not playlist.is_default %}
+                                        <a href="{% url 'delete_pl' playlist.pk %}" class="minus-btn">
+                                            <img src="{% static 'music/img/tracks/minus.png' %}" alt="">
+                                        </a>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="container-sl">

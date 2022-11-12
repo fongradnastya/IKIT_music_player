@@ -208,7 +208,8 @@ class LinkedList:
 
 class Playlist(models.Model):
     name = models.CharField(max_length=255, null=True)
-    cover = models.ImageField(upload_to="photos/%Y/%m/%d/", null=True)
-    description = models.CharField(max_length=500, null=True)
+    cover = models.ImageField(upload_to="photos/%Y/%m/%d/",
+                              default="photos/2022/11/07/cover.png")
+    description = models.CharField(max_length=500, null=True, blank=True)
     is_default = models.BooleanField(default=False)
     compositions = models.ManyToManyField(Composition)

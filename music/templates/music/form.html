@@ -48,20 +48,15 @@
                         Playlist creation
                     </h1>
                     <div class="form">
-                        <div class="form__cover">
-                            <img src="{% static 'music/img/form/cover.png' %}" alt="">
-                        </div>
                         <div class="form__container">
-                            <h2 class="form__header">
-                                Playlist name:
-                            </h2>
-                            <form action="#" method="post" name="main">
-                                <div class="form__input">
-                                    <input class="input" type="text" name="name_input" value="" placeholder="enter playlist name here">
-                                </div>
-                                <button class="quit" name="quit_btn" type="reset">
-                                    Quit
-                                </button>
+                            <form action="{% url 'new' %}" method="post" name="main" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {% for f in form %}
+                                    <div class="form__input">
+                                        <label class="form__header" for="{{ f.id_for_label }}">{{ f.label }}: </label>
+                                        {{ f }}
+                                    </div>
+                                {% endfor %}
                                 <button class="save" type="submit" name="save_btn">
                                     Save
                                 </button>

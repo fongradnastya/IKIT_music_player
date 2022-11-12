@@ -1,0 +1,53 @@
+{% extends 'music/tracks.html' %}
+{% block item_track %}
+<div class="item__track">
+    <div class="item__container">
+        <div class="play__composition item__composition">
+            <div class="play__cover">
+                <div class="play__image">
+                    {% if composition.cover %}
+                    <img src="{{ composition.cover.url }}" alt="yttt">
+                    {% else %}
+                    <img src="{% static 'music/img/recommended.png' %}" alt="">
+                    {% endif %}
+                </div>
+                <div class="play__button">
+                    <a href="{% url 'play' composition.id %}"
+                       class="track__link">
+                        <img src="{% static 'music/img/tracks/play 3.png' %}"
+                             alt="">
+                    </a>
+                </div>
+            </div>
+            <div class="play__track">
+                <div class="play__name">
+                    {{ composition.name }}
+                </div>
+                <div class="play__author">
+                    {{ composition.author }}
+                </div>
+            </div>
+            <div class="buttons">
+                <a href="#" class="button__plus">
+                    <img src="{% static 'music/img/tracks/plus.png' %}"
+                         alt="">
+                </a>
+                <a href="#" class="button__like">
+                    <img src="{% static 'music/img/tracks/like.png' %}"
+                         alt="">
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<div class="playlists">
+    <div class="playlists_container">
+        {% for pl in playlists %}
+        <div class="list-item">
+            <a href="" class="list-link">{{ pl.name }}</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>

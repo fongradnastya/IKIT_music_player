@@ -160,7 +160,7 @@ body {
 }
 
 .main-block__body {
-    padding: 184px 0 191px 0;
+    padding: 150px 0 191px 0;
     position: relative;
     z-index: 2;
 }
@@ -190,8 +190,8 @@ body {
 
 .form{
     margin: 0 auto;
-    width: 808px;
-    height: 265px;
+    min-width: 600px;
+    min-height: 265px;
     background: rgba(43, 42, 109, 0.36);
     border-radius: 10px;
     display: flex;
@@ -205,7 +205,7 @@ body {
 }
 
 .input{
-    width: 100%;
+    width: 80%;
     font-weight: 400;
     line-height: 200%;
     letter-spacing: 0.2px;
@@ -268,4 +268,16 @@ body {
 .form__error{
     margin-top: 10px;
     color: rgb(253, 91, 91);
+}
+
+select {
+    background-color: #06046C;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+option {
+    color: #5A72B0;
+    font-size: 14px;
+    padding: 5px;
 }

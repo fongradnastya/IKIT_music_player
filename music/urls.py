@@ -11,7 +11,7 @@ urlpatterns = [
     path('playlist/<int:playlist_id>/track/<int:track_number>', play_all,
          name="play_all"),
     path("playlist/<int:playlist_id>/-track/<int:track_id>", delete_track,
-         name="delete")
+         name="delete"),
+    path('-playlists/<int:deleted_id>', delete_playlist, name="delete_pl")
 ]
-
 

@@ -1,6 +1,7 @@
 from django.http import HttpResponseNotFound
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import *
+from .forms import *
 
 
 def index(request):
@@ -15,8 +16,10 @@ def index(request):
 
 def tracks(request):
     compositions = Composition.objects.all()
+    tracks_array = create_tr_array(compositions)
     playlists = Playlist.objects.all()
     context = {
+        "tracks_array": tracks_array,
         "compositions": compositions,
         "playlists": playlists,
         "played": None
@@ -74,6 +77,17 @@ def count_track_number(playlist, track_number):
     return track_number
 
 
+def create_tr_array(compositions):
+    size = Composition.objects.count()
+    columns = size // 3
+    if size % 3 > 0:
+        columns += 1
+    tracks_array = []
+    for column in range(columns):
+        tracks_array.append(compositions[column * 4:(column + 1) * 4])
+    return tracks_array
+
+
 def create_array(playlist, compositions):
     size = playlist.compositions.count()
     columns = size // 4
@@ -101,7 +115,14 @@ def play_all(request, playlist_id, track_number):
 
 
 def create_playlist(request):
-    return render(request, "music/form.html")
+    if request.method == 'POST':
+        form = AddPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = AddPostForm()
+    return render(request, "music/form.html", {"form": form})
 
 
 def page_not_found(request, exception):
@@ -112,7 +133,7 @@ def new_track(request, playlist_id, track_number):
     playlists = Playlist.objects.all()
     playlist = Playlist.objects.get(id=playlist_id)
     track_number = count_track_number(playlist, track_number)
-    composition = playlist.compositions.all()[track_number]
+    composition = Composition.objects.get(order=track_number)
     context = {
         'playlists': playlists,
         "playlist": playlist,
@@ -136,3 +157,15 @@ def delete_track(request, playlist_id, track_id):
         'composition': None
     }
     return render(request, "music/playlist.html", context)
+
+
+def delete_playlist(request, deleted_id):
+    playlists = Playlist.objects.all()
+    deleted = Playlist.objects.get(id=deleted_id)
+    deleted.delete()
+    context = {
+        'playlists': playlists,
+        "playlist": None,
+        "composition": None
+    }
+    return render(request, "music/index.html", context)
