@@ -215,6 +215,9 @@ class Playlist(models.Model):
     compositions = models.ManyToManyField(Composition,
                                           through='PlaylistsCompositions')
 
+    def __str__(self):
+        return f"{self.name}"
+
 
 class PlaylistsCompositions(models.Model):
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)

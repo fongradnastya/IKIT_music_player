@@ -1,4 +1,4 @@
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect
 from .models import *
 from .forms import *
@@ -46,10 +46,16 @@ def play_track(request, track_id):
 
 
 def show_playlist(request, playlist_id):
+    """
+    Отображает плейлист и его треки
+    :param request:
+    :param playlist_id:
+    :return:
+    """
     playlist = Playlist.objects.get(id=playlist_id)
-    compositions = playlist.compositions.all()
+    compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     tracks_array = create_array(playlist, compositions)
-    set_order(compositions)
+    fix_order(playlist)
     context = {
         'playlist': playlist,
         'compositions': compositions,
@@ -57,17 +63,6 @@ def show_playlist(request, playlist_id):
         'composition': None
     }
     return render(request, "music/playlist.html", context)
-
-
-def set_order(compositions):
-    counter = 1
-    for composition in Composition.objects.all():
-        if composition in compositions:
-            composition.order = counter
-            counter += 1
-        else:
-            composition.order = 0
-        composition.save()
 
 
 def count_track_number(playlist, track_number):
@@ -102,8 +97,15 @@ def create_array(playlist, compositions):
 
 
 def play_all(request, playlist_id, track_number):
+    """
+    Проигрывание треков из плейлиста
+    :param request:
+    :param playlist_id:
+    :param track_number:
+    :return:
+    """
     playlist = Playlist.objects.get(id=playlist_id)
-    compositions = playlist.compositions.all()
+    compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     tracks_array = create_array(playlist, compositions)
     track_number = count_track_number(playlist, track_number)
     composition = Composition.objects.get(order=track_number)
@@ -117,6 +119,11 @@ def play_all(request, playlist_id, track_number):
 
 
 def create_playlist(request):
+    """
+    Создание нового плейлиста
+    :param request:
+    :return:
+    """
     if request.method == 'POST':
         form = AddPostForm(request.POST, request.FILES)
         if form.is_valid():
@@ -132,6 +139,13 @@ def page_not_found(request, exception):
 
 
 def new_track(request, playlist_id, track_number):
+    """
+    Проигрывание трека из списка
+    :param request:
+    :param playlist_id:
+    :param track_number:
+    :return:
+    """
     playlists = Playlist.objects.all()
     playlist = Playlist.objects.get(id=playlist_id)
     track_number = count_track_number(playlist, track_number)
@@ -145,13 +159,30 @@ def new_track(request, playlist_id, track_number):
     return render(request, "music/index.html", context)
 
 
+def fix_order(playlist):
+    previous = 0
+    for connect in PlaylistsCompositions.objects.filter(playlist=playlist):
+        order = connect.order
+        if order - previous != 1:
+            connect.order = previous + 1
+            connect.save()
+        previous = order
+
+
 def delete_track(request, playlist_id, track_id):
+    """
+    Удаление трека из плейлиста
+    :param request:
+    :param playlist_id:
+    :param track_id:
+    :return:
+    """
     playlist = Playlist.objects.get(id=playlist_id)
-    track = Composition.objects.get(id=track_id)
-    playlist.compositions.remove(track)
-    compositions = playlist.compositions.all()
-    set_order(compositions)
+    connection = PlaylistsCompositions.objects.get(id=track_id)
+    connection.delete()
+    compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     tracks_array = create_array(playlist, compositions)
+    fix_order(playlist)
     context = {
         'playlist': playlist,
         'compositions': compositions,
@@ -162,6 +193,12 @@ def delete_track(request, playlist_id, track_id):
 
 
 def delete_playlist(request, deleted_id):
+    """
+    Удаление плейлиста
+    :param request:
+    :param deleted_id:
+    :return:
+    """
     playlists = Playlist.objects.all()
     deleted = Playlist.objects.get(id=deleted_id)
     deleted.delete()
@@ -174,6 +211,12 @@ def delete_playlist(request, deleted_id):
 
 
 def choose_playlist(request, track_id):
+    """
+    Выбрать плейлист для добавления
+    :param request:
+    :param track_id:
+    :return:
+    """
     playlists = Playlist.objects.all()
     track = Composition.objects.get(id=track_id)
     context = {
@@ -184,16 +227,26 @@ def choose_playlist(request, track_id):
 
 
 def add_track(request, track_id, playlist_id):
+    """
+    Добавление трека в плейлист
+    :param request:
+    :param track_id:
+    :param playlist_id:
+    :return:
+    """
     playlist = Playlist.objects.get(id=playlist_id)
     track = Composition.objects.get(id=track_id)
     if not PlaylistsCompositions.objects.filter(
             playlist=playlist, composition=track).exists():
         PlaylistsCompositions.objects.create(playlist=playlist,
                                              composition=track, order=1)
-    playlist.compositions.add(track)
-    compositions = playlist.compositions.all()
+    else:
+        order = PlaylistsCompositions.objects.filter(playlist=playlist).count()
+        PlaylistsCompositions.objects.create(playlist=playlist,
+                                             composition=track, order=order+1)
+    fix_order(playlist)
+    compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     tracks_array = create_array(playlist, compositions)
-    set_order(compositions)
     context = {
         'playlist': playlist,
         'compositions': compositions,
@@ -201,3 +254,9 @@ def add_track(request, track_id, playlist_id):
         'composition': None
     }
     return render(request, "music/playlist.html", context)
+
+
+def sort(request):
+    film_pks_order = request.POST.getlist('item')
+    print(film_pks_order)
+    return HttpResponse("")
