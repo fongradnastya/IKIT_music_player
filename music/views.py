@@ -33,9 +33,11 @@ def play_track(request, track_id):
     elif track_id > 12:
         track_id = 1
     compositions = Composition.objects.all()
+    tracks_array = create_tr_array(compositions)
     track = Composition.objects.get(id=track_id)
     playlists = Playlist.objects.all()
     context = {
+        "tracks_array": tracks_array,
         "compositions": compositions,
         "playlists": playlists,
         "played": track
@@ -84,7 +86,7 @@ def create_tr_array(compositions):
         columns += 1
     tracks_array = []
     for column in range(columns):
-        tracks_array.append(compositions[column * 4:(column + 1) * 4])
+        tracks_array.append(compositions[column * 3:(column + 1) * 3])
     return tracks_array
 
 
@@ -146,7 +148,7 @@ def new_track(request, playlist_id, track_number):
 def delete_track(request, playlist_id, track_id):
     playlist = Playlist.objects.get(id=playlist_id)
     track = Composition.objects.get(id=track_id)
-    track.delete()
+    playlist.compositions.remove(track)
     compositions = playlist.compositions.all()
     set_order(compositions)
     tracks_array = create_array(playlist, compositions)
@@ -169,3 +171,33 @@ def delete_playlist(request, deleted_id):
         "composition": None
     }
     return render(request, "music/index.html", context)
+
+
+def choose_playlist(request, track_id):
+    playlists = Playlist.objects.all()
+    track = Composition.objects.get(id=track_id)
+    context = {
+        'playlists': playlists,
+        "track": track,
+    }
+    return render(request, "music/choose.html", context)
+
+
+def add_track(request, track_id, playlist_id):
+    playlist = Playlist.objects.get(id=playlist_id)
+    track = Composition.objects.get(id=track_id)
+    if not PlaylistsCompositions.objects.filter(
+            playlist=playlist, composition=track).exists():
+        PlaylistsCompositions.objects.create(playlist=playlist,
+                                             composition=track, order=1)
+    playlist.compositions.add(track)
+    compositions = playlist.compositions.all()
+    tracks_array = create_array(playlist, compositions)
+    set_order(compositions)
+    context = {
+        'playlist': playlist,
+        'compositions': compositions,
+        'tracks': tracks_array,
+        'composition': None
+    }
+    return render(request, "music/playlist.html", context)

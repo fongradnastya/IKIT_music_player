@@ -383,18 +383,18 @@ body {
     color:rgb(187, 191, 240)
 }
 
+.play__plus{
+}
+
 .playlists{
-    background: rgba(112, 195, 255, 0.53);
+    background: rgba(23, 35, 112, 0.46);
     border-radius: 10px;
     max-width: 200px;
-    position: absolute;
-    top: 200px;
-    right: 0;
-    z-index: 10;
+    margin: 0 auto;
 }
 
 .playlists_container{
-    margin: 20px;
+    padding: 20px;
 }
 
 .list-item{
@@ -404,4 +404,8 @@ body {
 .list-item:hover{
     background-color: #84a3ff;
     border-radius: 5px;
+}
+
+.list-link{
+    color: #06046C;
 }

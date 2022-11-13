@@ -212,4 +212,14 @@ class Playlist(models.Model):
                               default="photos/2022/11/07/cover.png")
     description = models.CharField(max_length=500, null=True, blank=True)
     is_default = models.BooleanField(default=False)
-    compositions = models.ManyToManyField(Composition)
+    compositions = models.ManyToManyField(Composition,
+                                          through='PlaylistsCompositions')
+
+
+class PlaylistsCompositions(models.Model):
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    composition = models.ForeignKey(Composition, on_delete=models.CASCADE)
+    order = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ['order']

@@ -1,9 +1,10 @@
-const place1 = document.querySelector(".plaseholder_1");
-const place2 = document.querySelector(".plaseholder_2");
-const track = document.querySelector(".item__track");
-
-place2.ondragover = Drop()
-
-function Drop(event){
-    event.preventDefault();
-}
+htmx.onLoad(function(content) {
+    let sortables = content.querySelectorAll(".sortable");
+    for (let i = 0; i < sortables.length; i++) {
+      let sortable = sortables[i];
+      new Sortable(sortable, {
+          animation: 150,
+          ghostClass: 'blue-background-class'
+      });
+    }
+})
