@@ -9,7 +9,7 @@ def index(request):
     context = {
         'playlists': playlists,
         "playlist": None,
-        "composition": None
+        "connection": None
     }
     return render(request, "music/index.html", context)
 
@@ -63,15 +63,6 @@ def show_playlist(request, playlist_id):
         'connect': None
     }
     return render(request, "music/playlist.html", context)
-
-
-def count_track_number(playlist, track_number):
-    size = playlist.compositions.count()
-    if track_number > size:
-        track_number = 1
-    elif track_number < 1:
-        track_number = size
-    return track_number
 
 
 def count_order(playlist, order):
@@ -147,7 +138,7 @@ def page_not_found(request, exception):
     return HttpResponseNotFound("<h1>Страница не найдена</h1>")
 
 
-def new_track(request, playlist_id, track_number):
+def new_track(request, playlist_id, track_order):
     """
     Проигрывание трека из списка
     :param request:
@@ -157,13 +148,16 @@ def new_track(request, playlist_id, track_number):
     """
     playlists = Playlist.objects.all()
     playlist = Playlist.objects.get(id=playlist_id)
-    track_number = count_track_number(playlist, track_number)
-    composition = Composition.objects.get(order=track_number)
+    track_order = count_order(playlist, track_order)
+    if not PlaylistsCompositions.objects.filter(playlist=playlist):
+        connection = None
+    else:
+        connection = PlaylistsCompositions.objects.get(order=track_order,
+                                                       playlist=playlist)
     context = {
         'playlists': playlists,
         "playlist": playlist,
-        "composition": composition,
-        "track_number": track_number
+        "connection": connection,
     }
     return render(request, "music/index.html", context)
 

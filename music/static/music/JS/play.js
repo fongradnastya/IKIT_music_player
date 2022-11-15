@@ -66,3 +66,6 @@ function nextSong(){
 audio.addEventListener("ended", nextSong)
 
 
+$('.play__button').on('click', function() {
+    play()
+});document.addEventListener("DOMContentLoaded", play)

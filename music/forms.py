@@ -5,9 +5,10 @@ from .models import *
 class AddPostForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
     class Meta:
         model = Playlist
-        fields = ("name", "description", "compositions", "cover")
+        fields = ("name", "description", "cover")
         widgets = {
             "name": forms.TextInput(attrs={
                 'class': 'input', 'placeholder': "enter playlist name here"}),

@@ -52,9 +52,6 @@
                     {% endif %}
                 </ul>
             </nav>
-            <a href="#" class="header__user">
-                <img src="{% static 'music/img/user.png' %}" alt="profile">
-            </a>
         </div>
     </header>
     <main class="page">
@@ -71,9 +68,11 @@
                                     <div class="playlist__name">
                                         {{ playlist.name }}
                                     </div>
+                                    {% if playlist.description %}
                                     <div class="playlist__description">
                                         {{ playlist.description }}
                                     </div>
+                                    {% endif %}
                                 </div>
                                 {% if not playlist.is_default %}
                                 <a href="{% url 'delete_pl' playlist.pk %}"
@@ -190,10 +189,6 @@
                     </div>
                 </div>
                 <div class="play__add">
-                    <a href="#" class="play__downoload">
-                        <img src="{% static 'music/img/play/download 1.png' %}"
-                             alt="">
-                    </a>
                     <a href="{% url 'choose' connect.composition.pk %}" class="play__plus">
                         <img src="{% static 'music/img/play/plus-small 1.png' %}"
                              alt="">

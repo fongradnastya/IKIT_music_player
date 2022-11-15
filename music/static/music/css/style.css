@@ -259,7 +259,7 @@ body {
 .track__buttons { 
     position: absolute;
     top: 40%;
-    left: 0;
+    left: 40%;
     width: 175px;
     display: none;
 }

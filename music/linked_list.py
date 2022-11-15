@@ -80,7 +80,7 @@ class LinkedList:
         return self.head
 
     @property
-    def last_item(self):
+    def last(self):
         """Возвращает последний элемент"""
         result = None
         if self.head:

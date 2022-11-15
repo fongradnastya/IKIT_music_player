@@ -7,7 +7,7 @@ urlpatterns = [
     path('tracks', tracks, name="tracks"),
     path('new_playlist/', create_playlist, name='new'),
     path('tracks/<int:track_id>', play_track, name="play"),
-    path('<int:playlist_id>/track/<int:track_number>', new_track, name="next"),
+    path('<int:playlist_id>/track/<int:track_order>', new_track, name="next"),
     path('playlist/<int:playlist_id>/track/<int:order>', play_all,
          name="play_all"),
     path("playlist/<int:playlist_id>/-track/<int:track_id>", delete_track,
