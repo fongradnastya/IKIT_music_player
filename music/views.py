@@ -60,7 +60,7 @@ def show_playlist(request, playlist_id):
         'playlist': playlist,
         'compositions': compositions,
         'tracks': tracks_array,
-        'composition': None
+        'connect': None
     }
     return render(request, "music/playlist.html", context)
 
@@ -72,6 +72,15 @@ def count_track_number(playlist, track_number):
     elif track_number < 1:
         track_number = size
     return track_number
+
+
+def count_order(playlist, order):
+    size = PlaylistsCompositions.objects.filter(playlist=playlist).count()
+    if order > size:
+        order = 1
+    elif order < 1:
+        order = size
+    return order
 
 
 def create_tr_array(compositions):
@@ -96,7 +105,7 @@ def create_array(playlist, compositions):
     return tracks_array
 
 
-def play_all(request, playlist_id, track_number):
+def play_all(request, playlist_id, order):
     """
     Проигрывание треков из плейлиста
     :param request:
@@ -105,15 +114,15 @@ def play_all(request, playlist_id, track_number):
     :return:
     """
     playlist = Playlist.objects.get(id=playlist_id)
+    order = count_order(playlist, order)
     compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     tracks_array = create_array(playlist, compositions)
-    track_number = count_track_number(playlist, track_number)
-    composition = Composition.objects.get(order=track_number)
+    connect = PlaylistsCompositions.objects.get(order=order, playlist=playlist)
     context = {
         'playlist': playlist,
         'compositions': compositions,
         'tracks': tracks_array,
-        'composition': composition
+        'connect': connect
     }
     return render(request, "music/playlist.html", context)
 
