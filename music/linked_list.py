@@ -1,278 +1,282 @@
 """
-Реализация кольцевого двусвязного списка
+Модуль, реализующий двусвязный списком
 """
 
 
 class LinkedListItem:
-    """
-    Класс элемента Linked List
-    """
+    """Узел связного списка"""
 
-    def __init__(self, item):
-        """
-        Создаёт новый элемент двусвязного списка
-        :param item: значение для текущего элемента
-        """
-        self._next_item = None
-        self._previous_item = None
-        self._item = item
+    def __init__(self, data=None) -> None:
+        """Инициализация узла связного списка"""
+        self.data = data
+        self._previous = None
+        self._next = None
 
     @property
-    def next_item(self):
-        """Getter для следующего элемента"""
-        return self._next_item
-
-    @property
-    def previous_item(self):
-        """
-        Getter для предыдущего элемента
-        """
-        return self._previous_item
+    def next_item(self) -> "LinkedListItem":
+        """Получение следующего элемент"""
+        return self._next
 
     @next_item.setter
-    def next_item(self, value):
-        """
-        Setter для следующего элемента
-        :param value: значение для следующего элемента списка
-        :return:
-        """
-        if value:
-            if self._next_item != value:
-                self._next_item = value
+    def next_item(self, value: "LinkedListItem") -> None:
+        """Установка следующего элемента"""
+
+        # Проверяем, что значение передано
+        if value is not None:
+            # Если следующий элемент не равен текущему
+            if self.next_item != value:
+                self._next = value
                 value.previous_item = self
         else:
-            self._next_item = None
-
-    @previous_item.setter
-    def previous_item(self, value):
-        """Setter для следующего элемента"""
-        if value:
-            if self._previous_item != value:
-                self._previous_item = value
-                value.next_item = self
-        else:
-            self._previous_item = None
+            self._next = None
 
     @property
-    def item(self):
-        """Возврат элемента"""
-        return self._item
+    def previous_item(self) -> "LinkedListItem":
+        """Получение предыдущего элемента"""
+        return self._previous
+
+    @previous_item.setter
+    def previous_item(self, value: "LinkedListItem") -> None:
+        """Установка предыдущего элемента"""
+
+        # Проверяем, что значение передано
+        if value is not None:
+            # Если предыдущий элемент не равен текущему
+            if self.previous_item != value:
+                self._previous = value
+                value.next_item = self
+        else:
+            self._previous = None
+
+    def __repr__(self) -> str:
+        """Читаемое отображение узла связного списка"""
+        return str(self.data)
 
 
 class LinkedList:
-    """
-    Класс реализации кольцевого двусвязного списка
-    """
+    """Двусвязный список"""
 
-    def __init__(self, item=None):
-        """
-        Создаёт экземпляр класса
-        :param item: первый элемент списка
-        """
-        self.head = None
-        self.count_item = 0
-        if item:
-            self.append(item)
+    def __init__(self, first_item=None) -> None:
+        """Инициализация колльцевого двусвязного списка"""
+        self.first_item = None
 
-    @property
-    def first_item(self):
-        """Возвращает последний элемент"""
-        return self.head
+        # Для того чтобы переменная была видна во всех методах
+        self.items_count = 0
+
+        # Проверяем, что объект передан
+        if first_item:
+            self.append(first_item)
 
     @property
-    def last(self):
-        """Возвращает последний элемент"""
-        result = None
-        if self.head:
-            result = self.head.previous_item
-        return result
+    def last(self) -> None:
+        """Последний элемент"""
+        if self.first_item:
+            return self.first_item.previous_item
+        return None
 
-    def append_left(self, item: LinkedListItem):
-        """
-        Добавление элемента в начало списка
-        :param item: элемент для добавления
-        :return:
-        """
+    def append_left(self, item: object) -> None:
+        """Добавление элемента в начало списка"""
         if not isinstance(item, LinkedListItem):
             item = LinkedListItem(item)
-        if not self.head:
-            self.head = item
-            self.head.next_item = self.head
-            self.head.previous_item = self.head
+
+        # Если первого элемента нет
+        if not self.first_item:
+            self.first_item = item
+            self.first_item.next_item = self.first_item
+            self.first_item.previous_item = self.first_item
+
         else:
-            self.head.previous_item.next_item = item
-            item.next_item = self.head
-            self.head = self.head.previous_item
+            # Устанавливаем у последнего элемента списка следующий элемент вместо first_item
+            self.first_item.previous_item.next_item = item
 
-    def append_right(self, item: LinkedListItem):
-        """
-        Добавление элемента в конец списка
-        :param item: значение для добавления
-        :return:
-        """
+            # Новый элемент теперь стоит перед первым, first_item становится вторым элементом
+            item.next_item = self.first_item
+
+            # Меняем ссылку на первый элемент
+            self.first_item = item
+
+    def append_right(self, item: object) -> None:
+        """Добавление элемента в конец списка"""
         if not isinstance(item, LinkedListItem):
             item = LinkedListItem(item)
-        if not self.head:
-            self.head = item
-            if self.head.next_item:
-                current = self.head
-                while current.next_item != self.head:
-                    current = current.next_item
-                self.head.previous_item = current
-                current.next_item = self.head
+
+        # Если первого элемента нет
+        if not self.first_item:
+            self.first_item = item
+
+            # Если ссылка на следующий элемент не пустая
+            if self.first_item.next_item:
+                current_item = self.first_item
+
+                while current_item.next_item != self.first_item:
+                    current_item = current_item.next_item
+
+                self.first_item.previous_item = current_item
+
             else:
-                self.head.previous_item = self.head
+                self.first_item.previous_item = self.first_item
         else:
-            self.head.previous_item.next_item = item
-            item.next_item = self.head
+            self.last.next_item = item
+            self.first_item.previous_item = item
 
-    def append(self, item: LinkedListItem):
-        """
-        Аналог метода append_right
-        :param item: значение для добавления
-        :return:
-        """
+    def append(self, item: object) -> None:
+        """Добавление справа"""
         self.append_right(item)
 
-    def remove(self, item: LinkedListItem):
-        """
-        Удаление элемента по значению
-        :param item: значение удаляемого элемента
-        :return:
-        """
+    def remove(self, item: int) -> None:
+        """Удаление элемента"""
+        item = LinkedListItem(item)
+
+        # Если первого элемента нет
+        if not self.first_item:
+            raise ValueError()
+
+            # Если мы хотим удалить первый элемент
+        if item.data == self.first_item.data:
+
+            # Проверка, что в списке всего 1 элемент
+            if self.last == self.first_item:
+                # "Обнуляем ссылку на первый элемент"
+                self.first_item = None
+
+            else:
+                remove_item = self.first_item
+                self.first_item = self.first_item.next_item
+                remove_item.next_item.previous_item = remove_item.previous_item
+
+                # Убираем у удалённого элемента ссылки на следующий и предыдущий элемент.
+                remove_item.next_item = None
+                remove_item.previous_item = None
+
+        else:
+            current_item = self.first_item.next_item
+            desired_element = True
+
+            while current_item != self.first_item:
+
+                if current_item.data == item.data:
+                    desired_element = False
+                    break
+
+                current_item = current_item.next_item
+
+            if desired_element is False:
+                remove_item = current_item
+                remove_item.next_item.previous_item = remove_item.previous_item
+
+                remove_item.next_item = None
+                remove_item.previous_item = None
+            else:
+                raise ValueError()
+
+    def insert(self, previous: "LinkedListItem", item: int):
+        """Вставка справа"""
+
+        if not isinstance(previous, LinkedListItem):
+            raise ValueError("previous должен быть элементом связного списка.")
+
         if not isinstance(item, LinkedListItem):
             item = LinkedListItem(item)
-        if self.head:
-            if item.item == self.head.item:
-                if self.head.next_item == self.head:
-                    self.head = None
-                else:
-                    remove_item = self.head
-                    self.head = self.head.next_item
-                    remove_item.next_item.previous_item = \
-                        remove_item.previous_item
-                    remove_item.next_item = None
-                    remove_item.previous_item = None
-            else:
-                current = self.head.next_item
-                error = True
-                while current != self.head:
-                    if current.item == item.item:
-                        error = False
-                        break
-                    current = current.next_item
 
-                if not error:
-                    remove_item = current
-                    remove_item.next_item.previous_item = \
-                        remove_item.previous_item
-                    remove_item.next_item = None
-                    remove_item.previous_item = None
-                else:
-                    raise ValueError("There are no elements with such value")
-        else:
-            raise ValueError("Nothing to delete")
+        # Если первый элемент есть
+        if self.first_item:
 
-    def insert(self, previous, item):
-        """
-        Вставка элемента item после элемента previous
-        :param previous: предыдущее значение LinkedListItem
-        :param item: значение элемента для вставки
-        :return:
-        """
-        if self.head:
-            if not isinstance(item, LinkedListItem):
-                item = LinkedListItem(item)
-            if self.head == previous:
-                self.head.next_item.previous_item = item
-                self.head.next_item = item
+            # Сравнение позволяет понять, что у нас один элемент в списке
+            if self.last == self.first_item:
+                # Устанавливаем следующий элемент
+                self.last.previous_item = item
+                item.previous_item = self.first_item
+
             else:
-                current = self.head
-                while current.previous_item != previous:
-                    current = current.previous_item
-                current.previous_item.next_item = item
-                current.previous_item = item
+                current_item = self.first_item
+                while current_item.previous_item != previous:
+                    current_item = current_item.previous_item
+                current_item.previous_item.next_item = item
+                item.next_item = current_item
         else:
-            raise ValueError("There is no previous element")
+            # Чтобы пройти test_insert FAILED
+            raise ValueError()
 
     def __len__(self):
-        """Возврат длины списка"""
+        """Длина списка"""
         length = 0
-        if self.head:
-            length += 1
-            current = self.head
-            while current.next_item != self.head:
-                length += 1
-                current = current.next_item
 
+        # Если первый элемент есть
+        if self.first_item:
+            length += 1
+            current_item = self.first_item
+            while current_item.next_item != self.first_item:
+                length += 1
+                current_item = current_item.next_item
         return length
 
     def __iter__(self):
-        """Возврат итератора"""
-        self.count_item = 0
-        return self
+        """Получение итератора"""
+        new_item = self.first_item
 
-    def __next__(self):
-        """Возврат следующего элемента"""
-        if self.count_item == len(self):
-            raise StopIteration()
-
-        return_item = self[self.count_item]
-        self.count_item += 1
-
-        return return_item
+        while new_item:  # Если есть элемент
+            if new_item.next_item != self.first_item:
+                yield new_item  # "Выкидываемое" значение
+                new_item = new_item.next_item  # Переход к следующему элементу
+            else:
+                yield new_item
+                break
 
     def __getitem__(self, index):
-        """
-        Возврат элемента по индексу
-        :param index: индекс возвращаемого элемента
-        :return:
-        """
-        if not self.head:
-            raise IndexError()
-        if index >= len(self):
-            raise IndexError("Index is too big")
+        """Получение элемента по индексу"""
 
-        if index < 0:
-            index = index + len(self)
+        # Если элементом нет
+        if not self.first_item:
+            raise IndexError()
+
+        elif index >= len(self):
+            raise IndexError()
+
+        elif index < 0:
+            index += len(self)
             if index < 0:
-                raise IndexError("Index can't be negative")
-            result = self[index]
-        if not 0 <= index < len(self):
-            raise IndexError("Index out of range")
-        i = 0
-        current = self.head
-        while i != index:
-            i += 1
-            current = current.next_item
-        result = current
-        return result
+                raise IndexError()
+
+        elif not isinstance(index, int):
+            raise IndexError()
+
+        current_item = self.first_item
+
+        for _ in range(index):
+            current_item = current_item.next_item
+
+        return current_item
 
     def __contains__(self, item):
-        """
-        Поддержка оператора in
-        :param item: значение для проверки на вхождение
-        :return:
-        """
-        in_linked_list = False
-        if self.head:
-            for linked_list_item in enumerate(self):
-                if linked_list_item[1].item == item:
-                    in_linked_list = True
-                    break
+        """Поддержка оператора in"""
 
-        return in_linked_list
+        if self.first_item is None:
+            return False
+
+        new_item = self.first_item
+
+        while new_item.next_item != self.first_item:
+            if new_item.data == item:
+                return True
+            else:
+                new_item = new_item.next_item  # Переход к следующему элементу
+
+        if new_item.data == item:
+            return True
+        return False
 
     def __reversed__(self):
         """Поддержка функции reversed"""
-        result = self
-        if self.head:
-            new_head = LinkedList()
-            current = self.head.previous_item
-            new_head.append(current.item)
-            current = current.previous_item
-            while current != self.head.previous_item:
-                new_head.append(current.item)
-                current = current.previous_item
-            result = new_head
-        return result
+
+        new_item = self.last
+
+        while new_item:  # Если есть элемент
+            if new_item.previous_item != self.last:
+                yield new_item  # "Выкидываемое" значение
+                new_item = new_item.previous_item  # Переход к следующему элементу
+            else:
+                yield new_item
+                break
+
+    def __repr__(self):
+        return str([item for item in self])

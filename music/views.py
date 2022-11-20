@@ -1,6 +1,7 @@
 from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect
 from .models import *
+from .functions import *
 from .forms import *
 
 
@@ -16,6 +17,12 @@ def index(request):
 
 def tracks(request):
     compositions = Composition.objects.all()
+    add_to_favorite()
+    counter = 1
+    for composition in compositions:
+        composition.order = counter
+        composition.save()
+        counter += 1
     tracks_array = create_tr_array(compositions)
     playlists = Playlist.objects.all()
     context = {
@@ -28,13 +35,14 @@ def tracks(request):
 
 
 def play_track(request, track_id):
-    if track_id < 1:
-        track_id = 12
-    elif track_id > 12:
-        track_id = 1
     compositions = Composition.objects.all()
+    size = Composition.objects.count()
+    if track_id < 1:
+        track_id = size
+    elif track_id > size:
+        track_id = 1
     tracks_array = create_tr_array(compositions)
-    track = Composition.objects.get(id=track_id)
+    track = Composition.objects.get(order=track_id)
     playlists = Playlist.objects.all()
     context = {
         "tracks_array": tracks_array,
@@ -63,37 +71,6 @@ def show_playlist(request, playlist_id):
         'connect': None
     }
     return render(request, "music/playlist.html", context)
-
-
-def count_order(playlist, order):
-    size = PlaylistsCompositions.objects.filter(playlist=playlist).count()
-    if order > size:
-        order = 1
-    elif order < 1:
-        order = size
-    return order
-
-
-def create_tr_array(compositions):
-    size = Composition.objects.count()
-    columns = size // 3
-    if size % 3 > 0:
-        columns += 1
-    tracks_array = []
-    for column in range(columns):
-        tracks_array.append(compositions[column * 3:(column + 1) * 3])
-    return tracks_array
-
-
-def create_array(playlist, compositions):
-    size = playlist.compositions.count()
-    columns = size // 4
-    if size % 4 > 0:
-        columns += 1
-    tracks_array = []
-    for column in range(columns):
-        tracks_array.append(compositions[column * 4:(column + 1) * 4])
-    return tracks_array
 
 
 def play_all(request, playlist_id, order):
@@ -134,10 +111,6 @@ def create_playlist(request):
     return render(request, "music/form.html", {"form": form})
 
 
-def page_not_found(request, exception):
-    return HttpResponseNotFound("<h1>Страница не найдена</h1>")
-
-
 def new_track(request, playlist_id, track_order):
     """
     Проигрывание трека из списка
@@ -160,16 +133,6 @@ def new_track(request, playlist_id, track_order):
         "connection": connection,
     }
     return render(request, "music/index.html", context)
-
-
-def fix_order(playlist):
-    previous = 0
-    for connect in PlaylistsCompositions.objects.filter(playlist=playlist):
-        order = connect.order
-        if order - previous != 1:
-            connect.order = previous + 1
-            connect.save()
-        previous = order
 
 
 def delete_track(request, playlist_id, track_id):

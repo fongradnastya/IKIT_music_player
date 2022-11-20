@@ -67,7 +67,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="play__button">
-                                                <a href="{% url 'play' composition.id %}"
+                                                <a href="{% url 'play' composition.order %}"
                                                    class="track__link">
                                                     <img src="{% static 'music/img/tracks/play 3.png' %}"
                                                          alt="">
@@ -88,8 +88,11 @@
                                                      alt="">
                                             </a>
                                             <a href="" class="button__like">
-                                                <img src="{% static 'music/img/tracks/like.png' %}"
-                                                     alt="">
+                                                {% if composition.is_liked %}
+                                                <img src="{% static 'music/img/heart 2.png' %}" alt="">
+                                                {% else %}
+                                                <img src="{% static 'music/img/tracks/like.png' %}" alt="">
+                                                {% endif %}
                                             </a>
                                         </div>
                                     </div>
@@ -108,7 +111,7 @@
                 <audio class="audio" src="{{ played.audio.url }}"></audio>
                 <div class="play__control">
 
-                    <a href="{% url 'play' played.pk|add:'-1' %}"
+                    <a href="{% url 'play' played.order|add:'-1' %}"
                        class="play__previous">
                         <img src="{% static 'music/img/play/previos.png' %}"
                              alt="prev">
@@ -117,14 +120,10 @@
                         <img src="{% static 'music/img/play/play-pause 1.png' %}"
                              alt="play">
                     </a>
-                    <a href="{% url 'play' played.pk|add:1 %}"
+                    <a href="{% url 'play' played.order|add:1 %}"
                        class="play__next">
                         <img src="{% static 'music/img/play/next.png' %}"
                              alt="next">
-                    </a>
-                    <a href="#" class="play__list">
-                        <img src="{% static 'music/img/play/list 1.png' %}"
-                             alt="playlist">
                     </a>
                 </div>
                 <div class="play__composition">
@@ -152,10 +151,15 @@
                         <img src="{% static 'music/img/play/plus-small 1.png' %}"
                              alt="">
                     </a>
-                    <a href="#" class="play__like">
-                        <img src="{% static 'music/img/play/heart 1.png' %}"
-                             alt="">
+                    {% if played.is_liked %}
+                    <a href="{% url 'delete' 5 played.pk %}" class="play__like">
+                        <img src="{% static 'music/img/heart 2.png' %}" alt="">
                     </a>
+                    {% else %}
+                    <a href="{% url 'add' played.pk 5 %}" class="play__like">
+                        <img src="{% static 'music/img/tracks/like.png' %}" alt="">
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
