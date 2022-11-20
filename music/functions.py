@@ -4,9 +4,12 @@ from .models import *
 def add_to_favorite():
     playlist = Playlist.objects.get(id=5)
     connects = PlaylistsCompositions.objects.filter(playlist=playlist)
-    for connect in connects:
+    for connect in PlaylistsCompositions.objects.all():
         composition = connect.composition
-        composition.is_liked = True
+        if connect in connects:
+            composition.is_liked = True
+        else:
+            composition.is_liked = False
         composition.save()
 
 

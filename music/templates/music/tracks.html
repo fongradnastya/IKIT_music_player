@@ -87,13 +87,15 @@
                                                 <img src="{% static 'music/img/tracks/plus.png' %}"
                                                      alt="">
                                             </a>
-                                            <a href="" class="button__like">
-                                                {% if composition.is_liked %}
+                                            {% if composition.is_liked %}
+                                            <a href="{% url 'remove' composition.pk %}" class="button__like">
                                                 <img src="{% static 'music/img/heart 2.png' %}" alt="">
-                                                {% else %}
-                                                <img src="{% static 'music/img/tracks/like.png' %}" alt="">
-                                                {% endif %}
                                             </a>
+                                            {% else %}
+                                            <a href="{% url 'add' composition.pk 5 %}" class="button__like">
+                                                <img src="{% static 'music/img/tracks/like.png' %}" alt="">
+                                            </a>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -152,7 +154,7 @@
                              alt="">
                     </a>
                     {% if played.is_liked %}
-                    <a href="{% url 'delete' 5 played.pk %}" class="play__like">
+                    <a href="{% url 'remove' played.pk %}" class="play__like">
                         <img src="{% static 'music/img/heart 2.png' %}" alt="">
                     </a>
                     {% else %}
@@ -171,4 +173,4 @@
     <script src="{% static 'music/JS/play.js' %}"></script>
 </div>
 </body>
-</html>
+</html>x

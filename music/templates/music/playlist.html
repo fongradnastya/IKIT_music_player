@@ -121,16 +121,26 @@
                                                         </div>
                                                     </div>
                                                     <div class="buttons">
+                                                        {% if track.composition.is_liked %}
+                                                        <a href="{% url 'delete' 5 track.pk %}"
+                                                           class="button__like">
+                                                            <img src="{% static 'music/img/heart 2.png' %}"
+                                                                 alt="">
+                                                        </a>
+                                                        {% else %}
+                                                        <a href=""
+                                                           class="button__like">
+                                                            <img src="{% static 'music/img/tracks/like.png' %}"
+                                                                 alt="">
+                                                        </a>
+                                                        {% endif %}
+                                                        {% if playlist.pk != 5 %}
                                                         <a href="{% url 'delete' playlist.pk track.pk %}"
                                                            class="button__minus">
                                                             <img src="{% static 'music/img/tracks/minus.png' %}"
                                                                  alt="">
                                                         </a>
-                                                        <a href="#"
-                                                           class="button__like">
-                                                            <img src="{% static 'music/img/tracks/like.png' %}"
-                                                                 alt="">
-                                                        </a>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
                                             </div>
@@ -163,10 +173,6 @@
                        class="play__next">
                         <img src="{% static 'music/img/play/next.png' %}"
                              alt="next">
-                    </a>
-                    <a href="#" class="play__list">
-                        <img src="{% static 'music/img/play/list 1.png' %}"
-                             alt="playlist">
                     </a>
                 </div>
                 <div class="play__composition">

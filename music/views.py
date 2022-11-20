@@ -60,6 +60,7 @@ def show_playlist(request, playlist_id):
     :param playlist_id:
     :return:
     """
+    add_to_favorite()
     playlist = Playlist.objects.get(id=playlist_id)
     compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     tracks_array = create_array(playlist, compositions)
@@ -83,6 +84,7 @@ def play_all(request, playlist_id, order):
     """
     playlist = Playlist.objects.get(id=playlist_id)
     order = count_order(playlist, order)
+    fix_order(playlist)
     compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     tracks_array = create_array(playlist, compositions)
     connect = PlaylistsCompositions.objects.get(order=order, playlist=playlist)
@@ -213,6 +215,7 @@ def add_track(request, track_id, playlist_id):
     fix_order(playlist)
     compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     tracks_array = create_array(playlist, compositions)
+    add_to_favorite()
     context = {
         'playlist': playlist,
         'compositions': compositions,
@@ -226,3 +229,24 @@ def sort(request):
     film_pks_order = request.POST.getlist('item')
     print(film_pks_order)
     return HttpResponse("")
+
+
+def remove_from_favorite(request, track_id):
+    playlist = Playlist.objects.get(id=5)
+    connections = PlaylistsCompositions.objects.filter(playlist=playlist)
+    print(track_id)
+    for connection in connections:
+        if connection.composition.pk == track_id:
+            connection.delete()
+            compositions = PlaylistsCompositions.objects.filter(
+                playlist=playlist)
+            tracks_array = create_array(playlist, compositions)
+            fix_order(playlist)
+            add_to_favorite()
+            context = {
+                'playlist': playlist,
+                'compositions': compositions,
+                'tracks': tracks_array,
+                'composition': None
+            }
+            return render(request, "music/playlist.html", context)
