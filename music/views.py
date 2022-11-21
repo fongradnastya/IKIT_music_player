@@ -225,10 +225,19 @@ def add_track(request, track_id, playlist_id):
     return render(request, "music/playlist.html", context)
 
 
-def sort(request):
-    film_pks_order = request.POST.getlist('item')
-    print(film_pks_order)
-    return HttpResponse("")
+def sort(request, playlist_id):
+    playlist = Playlist.objects.get(id=playlist_id)
+    track_pks_order = request.POST.getlist('item')
+    print(track_pks_order)
+    for idx, track_pk in enumerate(track_pks_order, start=1):
+        composition = Composition.objects.get(pk=track_pk)
+        connect = PlaylistsCompositions.objects.get(composition=composition,
+                                                    playlist=playlist)
+        connect.order = idx
+        connect.save()
+    add_to_favorite()
+    compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
+    return render(request, "music/playlist.html", compositions)
 
 
 def remove_from_favorite(request, track_id):

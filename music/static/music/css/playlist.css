@@ -193,11 +193,6 @@ body {
     position: relative;
 }
 
-.play__container{
-    padding: 12px 40px 25px 20px;
-    display: flex;
-    align-items: center;
-}
 
 .play__container a {
     margin-left: 15px;
@@ -333,6 +328,13 @@ body {
     left: 20%;
     z-index: 10;
     background: url("../img/Rectangle.png") 0 0 no-repeat;
+    width: 1000px;
+}
+
+.play__container{
+    padding: 12px 60px 25px 40px;
+    display: flex;
+    align-items: center;
 }
 
 .play__add{
