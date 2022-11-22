@@ -187,6 +187,7 @@ def choose_playlist(request, track_id):
     """
     playlists = Playlist.objects.all()
     track = Composition.objects.get(id=track_id)
+    add_to_favorite()
     context = {
         'playlists': playlists,
         "track": track,
