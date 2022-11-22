@@ -5,7 +5,6 @@
 
 class LinkedListItem:
     """Узел связного списка"""
-
     def __init__(self, data=None) -> None:
         """Инициализация узла связного списка"""
         self.data = data
@@ -20,10 +19,7 @@ class LinkedListItem:
     @next_item.setter
     def next_item(self, value: "LinkedListItem") -> None:
         """Установка следующего элемента"""
-
-        # Проверяем, что значение передано
         if value is not None:
-            # Если следующий элемент не равен текущему
             if self.next_item != value:
                 self._next = value
                 value.previous_item = self
@@ -176,7 +172,7 @@ class LinkedList:
                 yield new_item
                 break
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> "LinkedListItem":
         """Получение элемента по индексу"""
         if not self.first_item:
             raise IndexError("This list is empty")
@@ -193,7 +189,7 @@ class LinkedList:
             current_item = current_item.next_item
         return current_item
 
-    def __contains__(self, item):
+    def __contains__(self, item: "LinkedListItem") -> bool:
         """Поддержка оператора in"""
         if self.first_item is None:
             return False
@@ -207,7 +203,7 @@ class LinkedList:
             return True
         return False
 
-    def __reversed__(self):
+    def __reversed__(self) -> None:
         """Поддержка функции reversed"""
         new_item = self.last
         while new_item:
@@ -220,15 +216,20 @@ class LinkedList:
 
     def __repr__(self) -> str:
         """
-
-        :return:
+        Создаёт строковое представление объекта
+        :return: строковое представление
         """
-        str = "tt"
-        return str([item for item in self])
+        if not self.first_item:
+            return "LinkedList[]"
+        string = "LinkedList["
+        for item in self:
+            string = f"{string}{item}, "
+        string = string[:-2] + "]"
+        return string
 
     def __str__(self) -> str:
         """
-
-        :return:
+        Создаёт строковое представление объекта
+        :return: строковое представление
         """
         return self.__repr__()
