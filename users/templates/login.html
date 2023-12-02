@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static 'music/img/icon.png' %}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Krona+One&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,100&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'music/css/form.css' %}">
+    <title>Login</title>
+</head>
+    <body>
+        <div class="wrapper">
+            <header class="header">
+                <div class="header__container container">
+                    <a href="{% url 'home' %}" class="header__logo">
+                        <img src="{% static 'music/img/logo.png' %}" alt="IKIT music">
+                    </a>
+                    <nav class="header__menu menu">
+                        <ul class="menu__list">
+                            <li>
+                                <a href="{% url 'home' %}" class="menu__link">Home</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'tracks' %}" class="menu__link">Tracks</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'home' %}" class="menu__link">Playlists</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'playlist' 5 %}" class="menu__link">Favorite</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'login' %}" class="menu__link current__item">Login</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </header>
+            <main class="page">
+                <section class="page__main-block main-block">
+                    <div class="main-block__container container">
+                        <div class="main-block__body">
+                            <h1 class="main-block__title">
+                                Login
+                            </h1>
+                            <div class="form">
+                                <div class="form__container">
+                                    <form action="{% url 'new' %}" method="post" name="main" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="form__input">
+                                            <label for="exampleInputUsername1" class="form__header">Username</label>
+                                            <input type="text" class="input" id="exampleInputUsername1" aria-describedby="usernameHelp">
+                                          </div>
+                                          <div class="form__input">
+                                            <label for="exampleInputPassword1" class="form__header">Password</label>
+                                            <input type="password" class="input" id="exampleInputPassword1">
+                                          </div>
+                                          <button type="submit" class="save">Submit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </body>
+</html>

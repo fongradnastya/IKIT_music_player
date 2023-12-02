@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="{% static 'music/css/form.css' %}">
     <title>Adding playlist</title>
 </head>
-<body>
     <body>
         <div class="wrapper">
             <header class="header">
@@ -35,38 +34,36 @@
                             </li>
                         </ul>
                     </nav>
-                    <a href="#" class="header__user">
-                        <img src="{% static 'music/img/user.png' %}" alt="profile">
-                    </a>
                 </div>
             </header>
-    <main class="page">
-        <section class="page__main-block main-block">
-            <div class="main-block__container container">
-                <div class="main-block__body">
-                    <h1 class="main-block__title">
-                        Playlist creation
-                    </h1>
-                    <div class="form">
-                        <div class="form__container">
-                            <form action="{% url 'new' %}" method="post" name="main" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                {% for f in form %}
-                                    <div class="form__input">
-                                        <label class="form__header" for="{{ f.id_for_label }}">{{ f.label }}: </label>
-                                        {{ f }}
-                                    </div>
-                                {% endfor %}
-                                <button class="save" type="submit" name="save_btn">
-                                    Save
-                                </button>
-                            </form>
+            <main class="page">
+                <section class="page__main-block main-block">
+                    <div class="main-block__container container">
+                        <div class="main-block__body">
+                            <h1 class="main-block__title">
+                                Playlist creation
+                            </h1>
+                            <div class="form">
+                                <div class="form__container">
+                                    <form action="{% url 'new' %}" method="post" name="main" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        {% for f in form %}
+                                            <div class="form__input">
+                                                <label class="form__header" for="{{ f.id_for_label }}">{{ f.label }}: </label>
+                                                {{ f }}
+                                            </div>
+                                        {% endfor %}
+                                        <button class="save" type="submit" name="save_btn">
+                                            Save
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </section>
+                </section>
+            </main>
+        </div>
         <script src="{% static 'music/JS/form.js' %}"></script>
-    </main>
-</body>
+    </body>
 </html>
