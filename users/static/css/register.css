@@ -163,7 +163,7 @@ body {
 }
 
 .main-block__body {
-    padding: 120px 0 40px 0;
+    padding: 120px 0 50px 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -183,8 +183,9 @@ body {
     font-family: 'Krona One', sans-serif;
     font-style: normal;
     font-weight: 400;
-    font-size: 24px;
-    line-height: 40px;
+    font-size: 36px;
+    line-height: 50px;
+    margin: 0 0 20px 0;
 }
 
 .form{
@@ -193,7 +194,7 @@ body {
     min-height: 265px;
     background: rgba(43, 42, 109, 0.36);
     border-radius: 10px;
-    padding: 30px 30px;
+    padding: 45px 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -210,8 +211,8 @@ body {
     width: 50%;
     min-width: 300px;
     font-weight: 400;
-    font-size: 14px;
-    line-height: 150%;
+    font-size: 16px;
+    line-height: 200%;
     padding: 10px 22px;
     border-radius: 5px;
     color:rgb(43, 42, 109);
@@ -252,8 +253,8 @@ body {
     background: #9965e8;
     border-radius: 5px;
     font-weight: 700;
-    font-size: 14px;
-    line-height: 150%;
+    font-size: 16px;
+    line-height: 200%;
     color: #fff;
     padding: 10px 0;
     transition: 0.3s linear;
@@ -265,22 +266,17 @@ body {
 }
 
 .form__header{
-    font-size: 16px;
+    font-size: 20px;
     line-height: 24px;
-    margin-bottom: 5px;
+    margin-bottom: 18px;
     font-weight: 700;
 }
 
 .error{
-    margin-top: 15px;
+    margin-top: 20px;
     color: rgb(229, 20, 20);
     font-size: 16px;
     font-weight: 500;
-}
-
-.errorlist li{
-    color: rgb(229, 20, 20);
-    margin-top: 5px;
 }
 
 select {
@@ -300,7 +296,7 @@ option {
     color: white;
     font-weight: 500;
     display: block;
-    margin: 10px 0 15px 0;
+    margin: 20px 0;
     transition: 0.3s linear;
 }
 

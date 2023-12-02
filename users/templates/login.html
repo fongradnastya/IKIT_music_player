@@ -18,47 +18,36 @@
                     <a href="{% url 'home' %}" class="header__logo">
                         <img src="{% static 'music/img/logo.png' %}" alt="IKIT music">
                     </a>
-                    <nav class="header__menu menu">
-                        <ul class="menu__list">
-                            <li>
-                                <a href="{% url 'home' %}" class="menu__link">Home</a>
-                            </li>
-                            <li>
-                                <a href="{% url 'tracks' %}" class="menu__link">Tracks</a>
-                            </li>
-                            <li>
-                                <a href="{% url 'home' %}" class="menu__link">Playlists</a>
-                            </li>
-                            <li>
-                                <a href="{% url 'playlist' 5 %}" class="menu__link">Favorite</a>
-                            </li>
-                            <li>
-                                <a href="{% url 'login' %}" class="menu__link current__item">Login</a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
             </header>
             <main class="page">
                 <section class="page__main-block main-block">
                     <div class="main-block__container container">
                         <div class="main-block__body">
-                            <h1 class="main-block__title">
-                                Login
-                            </h1>
                             <div class="form">
+                                <h1 class="main-block__title">Login</h1>
                                 <div class="form__container">
-                                    <form action="{% url 'new' %}" method="post" name="main" enctype="multipart/form-data">
+                                    <form action="{% url 'login' %}" method="post" name="main" enctype="multipart/form-data">
                                         {% csrf_token %}
                                         <div class="form__input">
                                             <label for="exampleInputUsername1" class="form__header">Username</label>
-                                            <input type="text" class="input" id="exampleInputUsername1" aria-describedby="usernameHelp">
-                                          </div>
-                                          <div class="form__input">
+                                            <input type="text" class="input" id="exampleInputUsername1" aria-describedby="usernameHelp"
+                                                   placeholder="Enter your username" name="username">
+                                            {{ form.username.errors }}
+                                        </div>
+                                        <div class="form__input">
                                             <label for="exampleInputPassword1" class="form__header">Password</label>
-                                            <input type="password" class="input" id="exampleInputPassword1">
-                                          </div>
-                                          <button type="submit" class="save">Submit</button>
+                                            <input type="password" class="input" id="exampleInputPassword1"
+                                                   placeholder="Enter your password" name="password">
+                                            {{ form.password.errors }}
+                                        </div>
+                                        <div class="error">
+                                            {% if form.non_field_errors %}
+                                                {{ form.non_field_errors }}
+                                            {% endif %}
+                                        </div>
+                                        <a href="{% url 'register' %}" class="register">Don't have an account? Sign up</a>
+                                        <button type="submit" class="save">Login</button>
                                     </form>
                                 </div>
                             </div>

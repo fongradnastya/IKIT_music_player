@@ -21,9 +21,6 @@
                     <nav class="header__menu menu">
                         <ul class="menu__list">
                             <li>
-                                <a href="{% url 'home' %}" class="menu__link">Home</a>
-                            </li>
-                            <li>
                                 <a href="{% url 'tracks' %}" class="menu__link">Tracks</a>
                             </li>
                             <li>
@@ -33,9 +30,12 @@
                                 <a href="{% url 'playlist' 5 %}" class="menu__link">Favorite</a>
                             </li>
                             <li>
-                                <a href="{% url 'login' %}" class="menu__link">Login</a>
+                                <a href="{% url 'logout' %}" class="menu__link">Logout</a>
                             </li>
                         </ul>
+                        <div class="user">
+                            <div class="user__name">{{ username }}</div>
+                        </div>
                     </nav>
                 </div>
             </header>

@@ -1,16 +1,23 @@
 from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect
-from .models import *
+
+from users.models import User
 from .functions import *
 from .forms import *
 
 
 def index(request):
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
+
     playlists = Playlist.objects.all()
     context = {
         'playlists': playlists,
         "playlist": None,
-        "connection": None
+        "connection": None,
+        "username": user.username,
     }
     return render(request, "music/index.html", context)
 
