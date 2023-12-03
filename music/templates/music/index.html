@@ -27,14 +27,17 @@
                                 <a href="{% url 'home' %}" class="menu__link current__item">Playlists</a>
                             </li>
                             <li>
-                                <a href="{% url 'playlist' 5 %}" class="menu__link">Favorite</a>
-                            </li>
-                            <li>
-                                <a href="{% url 'logout' %}" class="menu__link">Logout</a>
+                                <a href="{% url 'favorite' %}" class="menu__link">Favorite</a>
                             </li>
                         </ul>
-                        <div class="user">
-                            <div class="user__name">{{ username }}</div>
+                        <div class="header__info">
+                            <div class="header__user">
+                                <img src="{% static 'music/img/user.png' %}" alt="profile">
+                            </div>
+                            <div class="user__info">
+                                <div class="user__name">{{ username }}</div>
+                                <a href="{% url 'logout' %}" class="menu__link">Logout</a>
+                            </div>
                         </div>
                     </nav>
                 </div>

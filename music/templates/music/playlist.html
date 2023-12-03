@@ -16,219 +16,209 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <title>{{ playlist.name }}</title>
 </head>
-<body>
-<div class="wrapper">
-    <header class="header">
-        <div class="header__container container">
-            <a href="{% url 'home' %}" class="header__logo">
-                <img src="{% static 'music/img/logo.png' %}" alt="IKIT music">
-            </a>
-            <nav class="header__menu menu">
-                <ul class="menu__list">
-                    <li>
-                        <a href="{% url 'home' %}" class="menu__link">Home</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'tracks' %}"
-                           class="menu__link">Tracks</a>
-                    </li>
-                    {% if not playlist.name == "Favorite" %}
-                    <li>
-                        <a href="{% url 'home' %}"
-                           class="menu__link current__item">Playlists</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'playlist' 5 %}" class="menu__link">Favorite</a>
-                    </li>
-                    {% else %}
-                    <li>
-                        <a href="{% url 'home' %}"
-                           class="menu__link">Playlists</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'playlist' 5 %}"
-                           class="menu__link current__item">Favorite</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'login' %}" class="menu__link">Login</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-    </header>
-    <main class="page">
-        <section class="page__main-block main-block">
-            <div class="main-block__container container">
-                <div class="main-block__body">
-                    <div class="playlist__container">
-                        <div class="playlist__cover">
-                            <div class="playlist__image">
-                                <img src="{{ playlist.cover.url }}" alt="">
+    <body>
+        <div class="wrapper">
+            <header class="header">
+                <div class="header__container container">
+                    <a href="{% url 'home' %}" class="header__logo">
+                        <img src="{% static 'music/img/logo.png' %}" alt="IKIT music">
+                    </a>
+                    <nav class="header__menu menu">
+                        <ul class="menu__list">
+                            <li>
+                                <a href="{% url 'tracks' %}" class="menu__link">Tracks</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'home' %}" class="menu__link current__item">Playlists</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'favorite' %}" class="menu__link">Favorite</a>
+                            </li>
+                        </ul>
+                        <div class="header__info">
+                            <div class="header__user">
+                                <img src="{% static 'music/img/user.png' %}" alt="profile">
                             </div>
-                            <div class="playlist__information">
-                                <div class="playlist__text">
-                                    <div class="playlist__name">
-                                        {{ playlist.name }}
-                                    </div>
-                                    {% if playlist.description %}
-                                    <div class="playlist__description">
-                                        {{ playlist.description }}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% if not playlist.is_default %}
-                                <a href="{% url 'delete_pl' playlist.pk %}"
-                                   class="minus-btn">
-                                    <img src="{% static 'music/img/tracks/minus.png' %}"
-                                         alt="">
-                                </a>
-                                {% endif %}
+                            <div class="user__info">
+                                <div class="user__name">{{ username }}</div>
+                                <a href="{% url 'logout' %}" class="menu__link">Logout</a>
                             </div>
                         </div>
-                        <div class="container-sl">
-                            <div class="slider">
-                                {% for column in tracks %}
-                                <div class="slider__item">
-                                    <form class="sortable" hx-post="{% url 'sort' playlist.pk %}"
-                                          hx-trigger="end">
-                                        {% csrf_token %}
-                                        <div class="htmx-indicator">
-                                            Updating...
+                    </nav>
+                </div>
+            </header>
+            <main class="page">
+                <section class="page__main-block main-block">
+                    <div class="main-block__container container">
+                        <div class="main-block__body">
+                            <div class="playlist__container">
+                                <div class="playlist__cover">
+                                    <div class="playlist__image">
+                                        <img src="{{ playlist.cover.url }}" alt="">
+                                    </div>
+                                    <div class="playlist__information">
+                                        <div class="playlist__text">
+                                            <div class="playlist__name">
+                                                {{ playlist.name }}
+                                            </div>
+                                            {% if playlist.description %}
+                                            <div class="playlist__description">
+                                                {{ playlist.description }}
+                                            </div>
+                                            {% endif %}
                                         </div>
-                                        {% for track in column %}
-                                        <div class="item__track" draggable='true'>
-                                            <input type='hidden' name='item'
-                                                   value='{{ track.composition.pk }}'/>
-                                            <div class="item__container" >
-                                                <div class="play__composition item__composition">
-                                                    <div class="play__cover">
-                                                        <div class="play__image">
-                                                            <img src="{{ track.composition.cover.url }}"
-                                                                 alt="">
+                                        {% if not playlist.is_default %}
+                                        <a href="{% url 'delete_pl' playlist.pk %}"
+                                           class="minus-btn">
+                                            <img src="{% static 'music/img/tracks/minus.png' %}"
+                                                 alt="">
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="container-sl">
+                                    <div class="slider">
+                                        {% for column in tracks %}
+                                        <div class="slider__item">
+                                            <form class="sortable" hx-post="{% url 'sort' playlist.pk %}"
+                                                  hx-trigger="end">
+                                                {% csrf_token %}
+                                                <div class="htmx-indicator">
+                                                    Updating...
+                                                </div>
+                                                {% for track in column %}
+                                                <div class="item__track" draggable='true'>
+                                                    <input type='hidden' name='item'
+                                                           value='{{ track.composition.pk }}'/>
+                                                    <div class="item__container" >
+                                                        <div class="play__composition item__composition">
+                                                            <div class="play__cover">
+                                                                <div class="play__image">
+                                                                    <img src="{{ track.composition.cover.url }}"
+                                                                         alt="">
+                                                                </div>
+                                                                <div class="play__button">
+                                                                    <a href="{% url 'play_all' playlist.pk track.order %}"
+                                                                       class="track__link">
+                                                                        <img src="{% static 'music/img/tracks/play 3.png' %}"
+                                                                             alt="">
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                            <div class="play__track">
+                                                                <div class="play__name">
+                                                                    {{ track.composition.name }}
+                                                                </div>
+                                                                <div class="play__author">
+                                                                    {{ track.composition.author }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="buttons">
+                                                                {% if track.composition.is_liked %}
+                                                                <a href="{% url 'delete' 5 track.pk %}"
+                                                                   class="button__like">
+                                                                    <img src="{% static 'music/img/heart 2.png' %}"
+                                                                         alt="">
+                                                                </a>
+                                                                {% else %}
+                                                                <a href="{% url 'add' track.pk 5 %}"
+                                                                   class="button__like">
+                                                                    <img src="{% static 'music/img/tracks/like.png' %}"
+                                                                         alt="">
+                                                                </a>
+                                                                {% endif %}
+                                                                {% if playlist.pk != 5 %}
+                                                                <a href="{% url 'delete' playlist.pk track.pk %}"
+                                                                   class="button__minus">
+                                                                    <img src="{% static 'music/img/tracks/minus.png' %}"
+                                                                         alt="">
+                                                                </a>
+                                                                {% endif %}
+                                                            </div>
                                                         </div>
-                                                        <div class="play__button">
-                                                            <a href="{% url 'play_all' playlist.pk track.order %}"
-                                                               class="track__link">
-                                                                <img src="{% static 'music/img/tracks/play 3.png' %}"
-                                                                     alt="">
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                    <div class="play__track">
-                                                        <div class="play__name">
-                                                            {{ track.composition.name }}
-                                                        </div>
-                                                        <div class="play__author">
-                                                            {{ track.composition.author }}
-                                                        </div>
-                                                    </div>
-                                                    <div class="buttons">
-                                                        {% if track.composition.is_liked %}
-                                                        <a href="{% url 'delete' 5 track.pk %}"
-                                                           class="button__like">
-                                                            <img src="{% static 'music/img/heart 2.png' %}"
-                                                                 alt="">
-                                                        </a>
-                                                        {% else %}
-                                                        <a href="{% url 'add' track.pk 5 %}"
-                                                           class="button__like">
-                                                            <img src="{% static 'music/img/tracks/like.png' %}"
-                                                                 alt="">
-                                                        </a>
-                                                        {% endif %}
-                                                        {% if playlist.pk != 5 %}
-                                                        <a href="{% url 'delete' playlist.pk track.pk %}"
-                                                           class="button__minus">
-                                                            <img src="{% static 'music/img/tracks/minus.png' %}"
-                                                                 alt="">
-                                                        </a>
-                                                        {% endif %}
                                                     </div>
                                                 </div>
-                                            </div>
+                                                {% endfor %}
+                                            </form>
                                         </div>
                                         {% endfor %}
-                                    </form>
+                                    </div>
                                 </div>
-                                {% endfor %}
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </section>
-        {% if connect %}
-        <div class="play-track">
-            <div class="play__container">
-                <audio class="audio" src="{{ connect.composition.audio.url }}"></audio>
-                <div class="play__control">
-                    <a href="{% url 'play_all' playlist.pk connect.order|add:'-1' %}"
-                       class="play__previous">
-                        <img src="{% static 'music/img/play/previos.png' %}"
-                             alt="prev">
-                    </a>
-                    <a href="#" class="play__pause">
-                        <img src="{% static 'music/img/play/play-pause 1.png' %}"
-                             alt="play">
-                    </a>
-                    <a href="{% url 'play_all' playlist.pk connect.order|add:1 %}"
-                       class="play__next">
-                        <img src="{% static 'music/img/play/next.png' %}"
-                             alt="next">
-                    </a>
-                </div>
-                <div class="play__composition">
-                    <div class="play__image">
-                        <img src="{{ connect.composition.cover.url }}" alt="">
-                    </div>
-                    <div class="play__track">
-                        <div class="track__name">
-                            {{ connect.composition.name }}
+                </section>
+                {% if connect %}
+                <div class="play-track">
+                    <div class="play__container">
+                        <audio class="audio" src="{{ connect.composition.audio.url }}"></audio>
+                        <div class="play__control">
+                            <a href="{% url 'play_all' playlist.pk connect.order|add:'-1' %}"
+                               class="play__previous">
+                                <img src="{% static 'music/img/play/previos.png' %}"
+                                     alt="prev">
+                            </a>
+                            <a href="#" class="play__pause">
+                                <img src="{% static 'music/img/play/play-pause 1.png' %}"
+                                     alt="play">
+                            </a>
+                            <a href="{% url 'play_all' playlist.pk connect.order|add:1 %}"
+                               class="play__next">
+                                <img src="{% static 'music/img/play/next.png' %}"
+                                     alt="next">
+                            </a>
                         </div>
-                        <div class="track__author">
-                            {{ connect.composition.author }}
+                        <div class="play__composition">
+                            <div class="play__image">
+                                <img src="{{ connect.composition.cover.url }}" alt="">
+                            </div>
+                            <div class="play__track">
+                                <div class="track__name">
+                                    {{ connect.composition.name }}
+                                </div>
+                                <div class="track__author">
+                                    {{ connect.composition.author }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="play__progress">
+                            <div class="play__progress-container">
+                                <div class="play__line"></div>
+                                <div class="play__curr-progress"></div>
+                            </div>
+                        </div>
+                        <div class="play__add">
+                            <a href="{% url 'choose' connect.composition.pk %}" class="play__plus">
+                                <img src="{% static 'music/img/play/plus-small 1.png' %}"
+                                     alt="">
+                            </a>
+                            {% if connect.composition.is_liked %}
+                            <a href="{% url 'remove' connect.composition.pk %}" class="play__like">
+                                <img src="{% static 'music/img/heart 2.png' %}" alt="">
+                            </a>
+                            {% else %}
+                            <a href="{% url 'add' connect.composition.pk 5 %}" class="play__like">
+                                <img src="{% static 'music/img/tracks/like.png' %}" alt="">
+                            </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                <div class="play__progress">
-                    <div class="play__progress-container">
-                        <div class="play__line"></div>
-                        <div class="play__curr-progress"></div>
-                    </div>
-                </div>
-                <div class="play__add">
-                    <a href="{% url 'choose' connect.composition.pk %}" class="play__plus">
-                        <img src="{% static 'music/img/play/plus-small 1.png' %}"
-                             alt="">
-                    </a>
-                    {% if connect.composition.is_liked %}
-                    <a href="{% url 'remove' connect.composition.pk %}" class="play__like">
-                        <img src="{% static 'music/img/heart 2.png' %}" alt="">
-                    </a>
-                    {% else %}
-                    <a href="{% url 'add' connect.composition.pk 5 %}" class="play__like">
-                        <img src="{% static 'music/img/tracks/like.png' %}" alt="">
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
+                {% endif %}
+            </main>
         </div>
-        {% endif %}
-    </main>
-    <script>
-        htmx.onLoad(function (content) {
-            let sortables = content.querySelectorAll(".sortable");
-            for (let i = 0; i < sortables.length; i++) {
-                let sortable = sortables[i];
-                new Sortable(sortable, {
-                    animation: 150,
-                    ghostClass: 'blue-background-class'
-                });
-            }
-        })
-    </script>
-    <script src="{% static 'music/JS/play.js' %}"></script>
-</div>
-</body>
+        <script>
+            htmx.onLoad(function (content) {
+                let sortables = content.querySelectorAll(".sortable");
+                for (let i = 0; i < sortables.length; i++) {
+                    let sortable = sortables[i];
+                    new Sortable(sortable, {
+                        animation: 150,
+                        ghostClass: 'blue-background-class'
+                    });
+                }
+            })
+        </script>
+        <script src="{% static 'music/JS/play.js' %}"></script>
+    </body>
 </html>

@@ -1,9 +1,18 @@
-from django.http import HttpResponseNotFound, HttpResponse
+from django.http import HttpResponseNotFound, HttpResponse, \
+    HttpResponseForbidden
 from django.shortcuts import render, redirect
 
 from users.models import User
 from .functions import *
 from .forms import *
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=User)
+def create_default_playlist(sender, instance, created, **kwargs):
+    if created:
+        Playlist.objects.create(owner=instance, name='Favorite',
+                                is_default=True)
 
 
 def index(request):
@@ -12,7 +21,7 @@ def index(request):
 
     user = User.objects.get(id=request.session['user_id'])
 
-    playlists = Playlist.objects.all()
+    playlists = Playlist.objects.all().filter(owner=user)
     context = {
         'playlists': playlists,
         "playlist": None,
@@ -23,6 +32,10 @@ def index(request):
 
 
 def tracks(request):
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
     compositions = Composition.objects.all()
     add_to_favorite()
     counter = 1
@@ -31,17 +44,22 @@ def tracks(request):
         composition.save()
         counter += 1
     tracks_array = create_tr_array(compositions)
-    playlists = Playlist.objects.all()
+    playlists = Playlist.objects.all().filter(owner=user)
     context = {
         "tracks_array": tracks_array,
         "compositions": compositions,
         "playlists": playlists,
-        "played": None
+        "played": None,
+        'username': user.username,
     }
     return render(request, "music/tracks.html", context)
 
 
 def play_track(request, track_id):
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
     compositions = Composition.objects.all()
     size = Composition.objects.count()
     if track_id < 1:
@@ -50,25 +68,27 @@ def play_track(request, track_id):
         track_id = 1
     tracks_array = create_tr_array(compositions)
     track = Composition.objects.get(order=track_id)
-    playlists = Playlist.objects.all()
+    playlists = Playlist.objects.all().filter(owner=user)
     context = {
         "tracks_array": tracks_array,
         "compositions": compositions,
         "playlists": playlists,
-        "played": track
+        "played": track,
+        'username': user.username,
     }
     return render(request, "music/tracks.html", context)
 
 
 def show_playlist(request, playlist_id):
-    """
-    Отображает плейлист и его треки
-    :param request:
-    :param playlist_id:
-    :return:
-    """
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
     add_to_favorite()
     playlist = Playlist.objects.get(id=playlist_id)
+    if playlist.owner != user:
+        return HttpResponseForbidden(
+            "You do not have permission to see this playlist.")
     compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     tracks_array = create_array(playlist, compositions)
     fix_order(playlist)
@@ -76,20 +96,31 @@ def show_playlist(request, playlist_id):
         'playlist': playlist,
         'compositions': compositions,
         'tracks': tracks_array,
-        'connect': None
+        'connect': None,
+        'username': user.username,
     }
     return render(request, "music/playlist.html", context)
 
+def show_favorite(request):
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
+
+    # Get the "Favorite" playlist for the current user
+    playlist = Playlist.objects.get(owner=user, name='Favorite')
+    return redirect(f"playlist/{playlist.id}")
+
 
 def play_all(request, playlist_id, order):
-    """
-    Проигрывание треков из плейлиста
-    :param request:
-    :param playlist_id:
-    :param track_number:
-    :return:
-    """
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
     playlist = Playlist.objects.get(id=playlist_id)
+    if playlist.owner != user:
+        return HttpResponseForbidden(
+            "You do not have permission to see this playlist.")
     order = count_order(playlist, order)
     fix_order(playlist)
     compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
@@ -99,17 +130,17 @@ def play_all(request, playlist_id, order):
         'playlist': playlist,
         'compositions': compositions,
         'tracks': tracks_array,
-        'connect': connect
+        'connect': connect,
+        'username': user.username,
     }
     return render(request, "music/playlist.html", context)
 
 
 def create_playlist(request):
-    """
-    Создание нового плейлиста
-    :param request:
-    :return:
-    """
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
     if request.method == 'POST':
         form = AddPostForm(request.POST, request.FILES)
         if form.is_valid():
@@ -117,19 +148,23 @@ def create_playlist(request):
             return redirect('home')
     else:
         form = AddPostForm()
-    return render(request, "music/form.html", {"form": form})
+    context = {
+        "form": form,
+        'username': user.username,
+    }
+    return render(request, "music/form.html", context)
 
 
 def new_track(request, playlist_id, track_order):
-    """
-    Проигрывание трека из списка
-    :param request:
-    :param playlist_id:
-    :param track_number:
-    :return:
-    """
-    playlists = Playlist.objects.all()
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
+    playlists = Playlist.objects.all().filter(owner=user)
     playlist = Playlist.objects.get(id=playlist_id)
+    if playlist.owner != user:
+        return HttpResponseForbidden(
+            "You do not have permission to add tracks to this playlist.")
     track_order = count_order(playlist, track_order)
     if not PlaylistsCompositions.objects.filter(playlist=playlist):
         connection = None
@@ -140,19 +175,20 @@ def new_track(request, playlist_id, track_order):
         'playlists': playlists,
         "playlist": playlist,
         "connection": connection,
+        'username': user.username,
     }
     return render(request, "music/index.html", context)
 
 
 def delete_track(request, playlist_id, track_id):
-    """
-    Удаление трека из плейлиста
-    :param request:
-    :param playlist_id:
-    :param track_id:
-    :return:
-    """
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
     playlist = Playlist.objects.get(id=playlist_id)
+    if playlist.owner != user:
+        return HttpResponseForbidden(
+            "You do not have permission to delete tracks from this playlist.")
     connection = PlaylistsCompositions.objects.get(id=track_id)
     connection.delete()
     compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
@@ -162,55 +198,57 @@ def delete_track(request, playlist_id, track_id):
         'playlist': playlist,
         'compositions': compositions,
         'tracks': tracks_array,
-        'composition': None
+        'composition': None,
+        'username': user.username,
     }
     return render(request, "music/playlist.html", context)
 
 
 def delete_playlist(request, deleted_id):
-    """
-    Удаление плейлиста
-    :param request:
-    :param deleted_id:
-    :return:
-    """
-    playlists = Playlist.objects.all()
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
+    playlists = Playlist.objects.all().filter(owner=user)
     deleted = Playlist.objects.get(id=deleted_id)
+    if deleted.owner != user:
+        return HttpResponseForbidden(
+            "You do not have permission to delete this playlist.")
     deleted.delete()
     context = {
         'playlists': playlists,
         "playlist": None,
-        "composition": None
+        "composition": None,
+        'username': user.username,
     }
     return render(request, "music/index.html", context)
 
 
 def choose_playlist(request, track_id):
-    """
-    Выбрать плейлист для добавления
-    :param request:
-    :param track_id:
-    :return:
-    """
-    playlists = Playlist.objects.all()
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
+    playlists = Playlist.objects.all().filter(owner=user)
     track = Composition.objects.get(id=track_id)
     add_to_favorite()
     context = {
         'playlists': playlists,
         "track": track,
+        'username': user.username,
     }
     return render(request, "music/choose.html", context)
 
 
 def add_track(request, track_id, playlist_id):
-    """
-    Добавление трека в плейлист
-    :param request:
-    :param track_id:
-    :param playlist_id:
-    :return:
-    """
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
     playlist = Playlist.objects.get(id=playlist_id)
+    if playlist.owner != user:
+        return HttpResponseForbidden(
+            "You do not have permission to add tracks to this playlist.")
     track = Composition.objects.get(id=track_id)
     if not PlaylistsCompositions.objects.filter(
             playlist=playlist, composition=track).exists():
@@ -228,12 +266,17 @@ def add_track(request, track_id, playlist_id):
         'playlist': playlist,
         'compositions': compositions,
         'tracks': tracks_array,
-        'composition': None
+        'composition': None,
+        'username': user.username,
     }
     return render(request, "music/playlist.html", context)
 
 
 def sort(request, playlist_id):
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
     playlist = Playlist.objects.get(id=playlist_id)
     track_pks_order = request.POST.getlist('item')
     print(track_pks_order)
@@ -245,13 +288,20 @@ def sort(request, playlist_id):
         connect.save()
     add_to_favorite()
     compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
-    return render(request, "music/playlist.html", compositions)
+    context = {
+        "compositions": compositions,
+        'username': user.username,
+    }
+    return render(request, "music/playlist.html", context)
 
 
 def remove_from_favorite(request, track_id):
-    playlist = Playlist.objects.get(id=5)
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
+    playlist = Playlist.objects.get(owner=user, name='Favorite')
     connections = PlaylistsCompositions.objects.filter(playlist=playlist)
-    print(track_id)
     for connection in connections:
         if connection.composition.pk == track_id:
             connection.delete()
@@ -264,6 +314,7 @@ def remove_from_favorite(request, track_id):
                 'playlist': playlist,
                 'compositions': compositions,
                 'tracks': tracks_array,
-                'composition': None
+                'composition': None,
+                'username': user.username,
             }
             return render(request, "music/playlist.html", context)

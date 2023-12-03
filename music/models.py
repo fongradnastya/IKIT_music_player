@@ -1,5 +1,7 @@
 from django.db import models
 from django.urls import reverse
+
+from users.models import User
 from .linked_list import *
 
 
@@ -24,6 +26,7 @@ class Composition(models.Model):
 
 
 class Playlist(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, null=True)
     cover = models.ImageField(upload_to="photos/%Y/%m/%d/",
                               default="photos/2022/11/07/cover.png")

@@ -4,6 +4,7 @@ from .views import *
 urlpatterns = [
     path('', index, name='home'),
     path('playlist/<int:playlist_id>', show_playlist, name='playlist'),
+    path('favorite', show_favorite, name='favorite'),
     path('tracks', tracks, name="tracks"),
     path('new_playlist/', create_playlist, name='new'),
     path('tracks/<int:track_id>', play_track, name="play"),

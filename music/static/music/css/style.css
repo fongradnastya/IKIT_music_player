@@ -121,9 +121,21 @@ body {
     justify-self: flex-end;
 }
 
+.user__name{
+    font-size: 16px;
+    font-weight: 500;
+}
+
 .header__menu {
-    margin-left: 133px;
+    margin-left: 40px;
     padding: 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header__user{
+    margin-right: 15px;
 }
 
 .menu__list {
@@ -132,19 +144,28 @@ body {
 }
 
 .menu__list li {
-    margin-right: 64px;
+    margin-right: 40px;
 }
 
 .menu__list li:last-child {
     margin-right: 0;
 }
 
+.header__info{
+    display: flex;
+    align-items: center;
+}
+
 .menu__link {
-    color:#5A72B0;
+    color: #7f90bb;
     font-weight: 600;
     line-height: calc(24 / 14 * 100%);
-    letter-spacing: 0.2px;
     font-size: 16px;
+    transition: 0.3s linear;
+}
+
+.current__item{
+    color: rgb(193, 197, 241)
 }
 
 .menu__link:hover{
@@ -391,6 +412,3 @@ body {
     left: 0;
 }
 
-.current__item{
-    color:rgb(187, 191, 240)
-}

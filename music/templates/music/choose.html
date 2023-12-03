@@ -16,61 +16,60 @@
           href="{% static 'music/css/tracks.css' %}">
     <title>Tracks</title>
 </head>
-<body>
-<div class="wrapper">
-    <header class="header">
-        <div class="header__container container">
-            <a href="{% url 'home' %}" class="header__logo">
-                <img src="{% static 'music/img/logo.png' %}" alt="IKIT music">
-            </a>
-            <nav class="header__menu menu">
-                <ul class="menu__list">
-                    <li>
-                        <a href="{% url 'home' %}" class="menu__link">Home</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'tracks' %}"
-                           class="menu__link current__item">Tracks</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'home' %}" class="menu__link ">Playlists</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'playlist' 5 %}" class="menu__link">Favorite</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'login' %}" class="menu__link">Login</a>
-                    </li>
-                </ul>
-            </nav>
-            <a href="#" class="header__user">
-                <img src="{% static 'music/img/user.png' %}" alt="profile">
-            </a>
-        </div>
-    </header>
-    <main class="page">
-        <section class="page__main-block main-block">
-            <div class="main-block__container container">
-                <div class="main-block__body">
-                    <h1 class="main-block__title">
-                        Choose a playlist
-                    </h1>
-                    <div class="playlists">
-                        <div class="playlists_container">
-                            {% for pl in playlists %}
-                            <div class="list-item">
-                                <a href="{% url 'add' track.pk pl.pk %}"
-                                   class="list-link">
-                                    {{ pl.name }}
-                                </a>
+    <body>
+        <div class="wrapper">
+            <header class="header">
+                <div class="header__container container">
+                    <a href="{% url 'home' %}" class="header__logo">
+                        <img src="{% static 'music/img/logo.png' %}" alt="IKIT music">
+                    </a>
+                    <nav class="header__menu menu">
+                        <ul class="menu__list">
+                            <li>
+                                <a href="{% url 'tracks' %}" class="menu__link">Tracks</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'home' %}" class="menu__link current__item">Playlists</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'favorite' %}" class="menu__link">Favorite</a>
+                            </li>
+                        </ul>
+                        <div class="header__info">
+                            <div class="header__user">
+                                <img src="{% static 'music/img/user.png' %}" alt="profile">
                             </div>
-                            {% endfor %}
+                            <div class="user__info">
+                                <div class="user__name">{{ username }}</div>
+                                <a href="{% url 'logout' %}" class="menu__link">Logout</a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </header>
+            <main class="page">
+                <section class="page__main-block main-block">
+                    <div class="main-block__container container">
+                        <div class="main-block__body">
+                            <h1 class="main-block__title">
+                                Choose a playlist
+                            </h1>
+                            <div class="playlists">
+                                <div class="playlists_container">
+                                    {% for pl in playlists %}
+                                    <div class="list-item">
+                                        <a href="{% url 'add' track.pk pl.pk %}"
+                                           class="list-link">
+                                            {{ pl.name }}
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </section>
-    </main>
-</div>
-</body>
+                </section>
+            </main>
+        </div>
+    </body>
 </html>
