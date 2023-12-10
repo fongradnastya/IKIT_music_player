@@ -1,11 +1,13 @@
 import json
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from users.forms import RegisterForm, LoginForm
 from users.models import User
-from users.secure import DiffieHellman
+from users.secure import DiffieHellman, decrypt, hash_key
 
 dh = DiffieHellman()
 
@@ -28,15 +30,9 @@ def login(request):
 
 
 def register(request):
-    """if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            pass
-            # form.save()
-            # return redirect('login')
-    else:"""
     form = RegisterForm()
     return render(request, 'register.html', {'form': form})
+
 
 def logout(request):
     if 'user_id' in request.session:
@@ -44,10 +40,12 @@ def logout(request):
 
     return redirect('login')
 
+
 def get_public_key(request):
     public_key, p, q = dh.generate_public_key()
     print(public_key, p, q)
     return JsonResponse({'public_key': public_key, 'p': p, 'q': q})
+
 
 @csrf_exempt
 def receive_public_key(request):
@@ -61,3 +59,22 @@ def receive_public_key(request):
     else:
         return JsonResponse({'status': 'failed',
                              'error': 'Invalid request method'})
+
+
+@csrf_exempt
+def receive_registration_data(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        key = dh.get_key()
+        key_hash = hash_key(key)
+        iv = data.get('iv')
+        username = decrypt(data.get('username'), key_hash, iv)
+        email = decrypt(data.get('email'), key_hash, iv)
+        password = decrypt(data.get('password'), key_hash, iv)
+        print(username, email, password)
+        if username and email and password:
+            pass
+        return JsonResponse({'status': 'success'}, status=200)
+    else:
+        return JsonResponse({'status': 'failed',
+                             'error': 'Invalid request method'}, status=400)

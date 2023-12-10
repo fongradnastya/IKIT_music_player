@@ -1,12 +1,9 @@
 import secrets
-from sympy import randprime
-import sys
+from base64 import b64decode, b64encode
+
+from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import hashes, hmac
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import serialization, hashes, asymmetric
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import padding as sym_padding
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 import os
 
@@ -16,6 +13,7 @@ class DiffieHellman:
         self.p = 0
         self.q = 0
         self.private_key = 0
+        self.shared_secret = 0
 
     def find_primitive_root(self):
         print(1)
@@ -50,40 +48,63 @@ class DiffieHellman:
         if self.private_key > 0 and self.p > 0:
             print(other_public_key)
             self.shared_secret = pow(other_public_key, self.private_key, self.p)
-            encrypt_decrypt_example(self.shared_secret)
             return self.shared_secret
         else:
             self.shared_secret = 0
 
+    def get_key(self):
+        return self.shared_secret
 
 
-def encrypt_decrypt_example(secret_key):
-    # Hash the secret key
+def hash_key(secret_key):
     secret_key = str(secret_key)
     digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
     digest.update(secret_key.encode())
-    hashed_key = digest.finalize()
+    return digest.finalize()
 
-    # The data to encrypt
-    data = b'Hello, World!'
+
+def encrypt(text, key):
+    # Convert the text to bytes
+    data = text.encode()
 
     # Generate a random initialization vector (IV)
     iv = os.urandom(12)
 
-    # Create a new AES-GCM cipher using the hashed key
-    cipher = Cipher(algorithms.AES(hashed_key), modes.GCM(iv), backend=default_backend())
+    # Create a new AES-GCM cipher using the key
+    cipher = Cipher(algorithms.AES(key), modes.GCM(iv),
+                    backend=default_backend())
     encryptor = cipher.encryptor()
 
     # Encrypt the data
     encrypted_data = encryptor.update(data) + encryptor.finalize()
 
-    print(encrypted_data)
+    # Append the tag to the encrypted data
+    encrypted_data_with_tag = encrypted_data + encryptor.tag
 
+    # Convert the encrypted data with tag and IV to Base64 strings
+    encrypted_data_with_tag_str = b64encode(encrypted_data_with_tag).decode()
+    iv_str = b64encode(iv).decode()
+
+    return encrypted_data_with_tag_str, iv_str
+
+
+def decrypt(encrypted_text, key, iv):
+    iv = b64decode(iv)
+    # Decode the Base64 string back into bytes
+    encrypted_data_with_tag = b64decode(encrypted_text)
+
+    # Separate the encrypted data and the tag
+    encrypted_data = encrypted_data_with_tag[:-16]
+    tag = encrypted_data_with_tag[-16:]
+    decoded = ""
     # Create a new AES-GCM cipher for decryption
-    cipher = Cipher(algorithms.AES(hashed_key), modes.GCM(iv, encryptor.tag), backend=default_backend())
-    decryptor = cipher.decryptor()
-
-    # Decrypt the data
-    decrypted_data = decryptor.update(encrypted_data) + decryptor.finalize()
-
-    print(decrypted_data.decode())
+    try:
+        cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag),
+                        backend=default_backend())
+        decryptor = cipher.decryptor()
+        # Decrypt the data
+        decrypted_data = decryptor.update(encrypted_data) + decryptor.finalize()
+        decoded = decrypted_data.decode()
+    except InvalidTag:
+        print("Impossible to decrypt")
+    return decoded

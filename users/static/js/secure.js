@@ -5,27 +5,22 @@ form.addEventListener('submit', (event) => {
     validateForm();
 })
 
-function validateForm(){
+async function validateForm(){
     let pass1 = form.password.value;
     let pass2 = form.password_confirm.value;
     if(pass1 === pass2){
         let username = form.username.value;
         let email = form.email.value;
         if(username !== "" && email !== ""){
-            getSharedKey().then((key) => {
-                console.log('Key' + key);
-                convertKey(key).then(({key, iv}) => {
+            try {
+                let sharedKey = await getSharedKey();
+                console.log('Key' + sharedKey);
+                let {key, iv} = await convertKey(sharedKey);
                 // Encrypt the text
-                    return encrypt("Hello, world!", key, iv).then(encryptedText => {
-                        // Decrypt the text
-                        return decrypt(encryptedText, key, iv).then(decryptedText => {
-                            console.log('Decrypted text:', decryptedText);
-                        });
-                    });
-                }).catch(error => {
-                    console.error('An error occurred:', error);
-                });
-            })
+                await sendRegistrationData(key, iv);
+            } catch(error) {
+                console.error('An error occurred:', error);
+            }
         }
     }
     else{
@@ -33,22 +28,43 @@ function validateForm(){
     }
 }
 
-// Function to generate a prime number
-function generatePrimeNumber() {
-    while (true) {
-        let primeCandidate = Math.floor(Math.random() * 1000);
-        if (isPrime(primeCandidate)) {
-            return primeCandidate;
+async function sendRegistrationData(key, iv){
+    let username = form.username.value;
+    let email = form.email.value;
+    let password = form.password.value;
+
+    // Encrypt the data
+    let encryptedName = await encrypt(username, key, iv);
+    let encryptedEmail = await encrypt(email, key, iv);
+    let encryptedPassword = await encrypt(password, key, iv);
+
+    // Prepare the data to send to the server
+    let data = {
+        iv: btoa(String.fromCharCode.apply(null, iv)), // Convert the IV to a Base64 string
+        username: encryptedName,
+        email: encryptedEmail,
+        password: encryptedPassword
+    };
+
+    // Send the data to the server
+    fetch('http://127.0.0.1:8000/users/receive-registration', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
-    }
+        return response.json();
+    }).then(data => {
+        console.log('Success:', data);
+    }).catch(error => {
+        console.error('Error:', error);
+    });
 }
 
-// Function to check if a number is prime
-function isPrime(num) {
-    for(let i = 2; i < num; i++)
-        if(num % i === 0) return false;
-    return num > 1;
-}
 
 // Function to perform modular exponentiation
 function modPow(base, exponent, modulus) {
@@ -65,81 +81,75 @@ function modPow(base, exponent, modulus) {
     return result;
 }
 
-function getSharedKey(){
-    return receiveServerPublicKey().then(({serverPublicKey, p, q}) => {
-        console.log(serverPublicKey, p, q);
-        // Compute the shared secret
-        let publicKey = 1;
-        let sharedSecret = 0;
-        let privateKey = 0;
-        while(publicKey === 1){
-            privateKey = Math.floor(Math.random() * p);
-            sharedSecret = modPow(serverPublicKey, privateKey, p);
-            publicKey = modPow(q, privateKey, p);
-        }
-        console.log('Public' + publicKey)
-        console.log(sharedSecret);
-        return {sharedSecret, publicKey};
-    }).then(({sharedSecret, publicKey}) => {
-        sendClientPublicKey(publicKey);
-        return sharedSecret;
-    }).catch((error) => {
-        console.error(error)
-    });
+function countSharedSecret(serverPublicKey, p, q) {
+    let publicKey = 1;
+    let sharedSecret = 0;
+    let privateKey = 0;
+    while(publicKey === 1){
+        privateKey = Math.floor(Math.random() * p);
+        sharedSecret = modPow(serverPublicKey, privateKey, p);
+        publicKey = modPow(q, privateKey, p);
+    }
+    console.log('Public' + publicKey)
+    console.log(sharedSecret);
+    return {sharedSecret, publicKey}
 }
 
-function sendClientPublicKey(publicKey){
+
+async function getSharedKey(){
+    try {
+        let {serverPublicKey, p, q} = await receiveServerPublicKey();
+        console.log(serverPublicKey, p, q);
+        let {sharedSecret, publicKey} =
+            countSharedSecret(serverPublicKey, p, q);
+        await sendClientPublicKey(publicKey);
+        return sharedSecret;
+    } catch(error) {
+        console.error(error);
+    }
+}
+
+async function sendClientPublicKey(publicKey){
     let url = 'http://127.0.0.1:8000/users/receive-public-key';
     let data = {publicKey: publicKey}; // data to be sent to the server
 
-    fetch(url, {
+    // Send the data to the server
+    let response = await fetch(url, {
         method: 'POST', // or 'PUT'
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        console.log('Success:', data);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
     });
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+
+    let responseData = await response.json();
+    console.log('Success:', responseData);
 }
 
-function receiveServerPublicKey() {
-    return new Promise((resolve, reject) => {
-        // The URL of your server
-        const url = 'http://127.0.0.1:8000/users/get-public-key';
-        // Create a new XMLHttpRequest object
-        let xhr = new XMLHttpRequest();
-        // Configure the request
-        xhr.open('GET', url, true);
-        // Set the callback function
-        xhr.onload = function() {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                // Parse the response as text
-                let responseJson = JSON.parse(xhr.responseText);
-                let serverPublicKey = responseJson.public_key;
-                let p = responseJson.p;
-                let q = responseJson.q;
-                console.log(serverPublicKey, p, q);
-                // Resolve the promise with the public key
-                resolve({serverPublicKey, p, q});
-            } else {
-                // Reject the promise with the status text
-                reject(xhr.statusText);
-            }
-        };
-        // Handle network errors
-        xhr.onerror = function() {
-            reject(xhr.statusText);
-        };
-        // Send the request
-        xhr.send();
-    });
+async function receiveServerPublicKey() {
+    // The URL of your server
+    const url = 'http://127.0.0.1:8000/users/get-public-key';
+    try {
+        let response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        let responseJson = await response.json();
+        let serverPublicKey = responseJson.public_key;
+        let p = responseJson.p;
+        let q = responseJson.q;
+        console.log(serverPublicKey, p, q);
+        // Return the public key
+        return {serverPublicKey, p, q};
+    } catch (error) {
+        console.error('An error occurred:', error);
+    }
 }
+
 
 async function convertKey(secretKey){
     console.log('Started');
@@ -165,7 +175,7 @@ async function convertKey(secretKey){
 async function encrypt(text, key, iv) {
     // The data to encrypt
     const data = new TextEncoder().encode(text);
-    console.log(data);
+
     // Encrypt the data
     const encryptedData = await window.crypto.subtle.encrypt(
         {
@@ -175,24 +185,33 @@ async function encrypt(text, key, iv) {
         key,
         data
     );
-    console.log(new Uint8Array(encryptedData));
+
+    // Convert the encrypted data (including the tag) to a Base64 string
     const encryptedDataArray = new Uint8Array(encryptedData);
+    console.log(encryptedDataArray)
     return btoa(String.fromCharCode.apply(null, encryptedDataArray));
 }
 
 async function decrypt(text, key, iv){
-    const encryptedDataArray = Uint8Array.from(atob(text), c => c.charCodeAt(0));
-    const encryptedData = encryptedDataArray.buffer;
+    // Decode the Base64 string back into an ArrayBuffer
+    const encryptedDataWithTagArray = Uint8Array.from(atob(text), c => c.charCodeAt(0));
+
+    // Separate the encrypted data and the tag
+    const encryptedDataArray = encryptedDataWithTagArray.slice(0, -16);
+    const tagArray = encryptedDataWithTagArray.slice(-16);
+
     // Decrypt the data
     const decryptedData = await window.crypto.subtle.decrypt(
         {
             name: 'AES-GCM',
-            iv: iv
+            iv: iv,
+            additionalData: tagArray.buffer
         },
         key,
-        encryptedData
+        encryptedDataArray.buffer
     );
-    const decoded = new TextDecoder().decode(decryptedData)
+
+    const decoded = new TextDecoder().decode(decryptedData);
     console.log(decoded);
     return decoded;
 }
