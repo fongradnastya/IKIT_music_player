@@ -17,6 +17,7 @@ urlpatterns = [
     path('add_track/<int:track_id>', choose_playlist, name="choose"),
     path('add_track/<int:track_id>/playlist/<int:playlist_id>', add_track,
          name="add"),
+    path('like/<int:track_id>', like_playlist, name="like"),
     path("sort/<int:playlist_id>", sort, name="sort"),
     path("favorite/<int:track_id>", remove_from_favorite, name="remove")
 ]

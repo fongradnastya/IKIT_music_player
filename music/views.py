@@ -37,7 +37,6 @@ def tracks(request):
 
     user = User.objects.get(id=request.session['user_id'])
     compositions = Composition.objects.all()
-    add_to_favorite()
     counter = 1
     for composition in compositions:
         composition.order = counter
@@ -84,7 +83,6 @@ def show_playlist(request, playlist_id):
         return redirect('login')
 
     user = User.objects.get(id=request.session['user_id'])
-    add_to_favorite()
     playlist = Playlist.objects.get(id=playlist_id)
     if playlist.owner != user:
         return HttpResponseForbidden(
@@ -144,7 +142,9 @@ def create_playlist(request):
     if request.method == 'POST':
         form = AddPostForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            playlist = form.save(commit=False)
+            playlist.owner = user
+            playlist.save()
             return redirect('home')
     else:
         form = AddPostForm()
@@ -231,7 +231,6 @@ def choose_playlist(request, track_id):
     user = User.objects.get(id=request.session['user_id'])
     playlists = Playlist.objects.all().filter(owner=user)
     track = Composition.objects.get(id=track_id)
-    add_to_favorite()
     context = {
         'playlists': playlists,
         "track": track,
@@ -261,7 +260,6 @@ def add_track(request, track_id, playlist_id):
     fix_order(playlist)
     compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     tracks_array = create_array(playlist, compositions)
-    add_to_favorite()
     context = {
         'playlist': playlist,
         'compositions': compositions,
@@ -270,6 +268,14 @@ def add_track(request, track_id, playlist_id):
         'username': user.username,
     }
     return render(request, "music/playlist.html", context)
+
+def like_playlist(request, track_id):
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
+    playlist = Playlist.objects.get(owner=user, name="Favorite")
+    return redirect(f"/add_track/{track_id}/playlist/{playlist.id}")
 
 
 def sort(request, playlist_id):
@@ -286,7 +292,6 @@ def sort(request, playlist_id):
                                                     playlist=playlist)
         connect.order = idx
         connect.save()
-    add_to_favorite()
     compositions = PlaylistsCompositions.objects.filter(playlist=playlist)
     context = {
         "compositions": compositions,
@@ -309,7 +314,6 @@ def remove_from_favorite(request, track_id):
                 playlist=playlist)
             tracks_array = create_array(playlist, compositions)
             fix_order(playlist)
-            add_to_favorite()
             context = {
                 'playlist': playlist,
                 'compositions': compositions,

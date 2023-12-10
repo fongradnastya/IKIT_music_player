@@ -6,5 +6,6 @@ urlpatterns = [
     path("login", views.login, name="login"),
     path("register", views.register, name="register"),
     path("logout", views.logout, name="logout"),
-    path("public-key", views.get_public_key, name="public-key"),
+    path("get-public-key", views.get_public_key, name="get-public-key"),
+    path("receive-public-key", views.receive_public_key, name="receive-public-key"),
 ]

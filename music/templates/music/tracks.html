@@ -26,10 +26,10 @@
                     <nav class="header__menu menu">
                         <ul class="menu__list">
                             <li>
-                                <a href="{% url 'tracks' %}" class="menu__link">Tracks</a>
+                                <a href="{% url 'tracks' %}" class="menu__link current__item">Tracks</a>
                             </li>
                             <li>
-                                <a href="{% url 'home' %}" class="menu__link current__item">Playlists</a>
+                                <a href="{% url 'home' %}" class="menu__link">Playlists</a>
                             </li>
                             <li>
                                 <a href="{% url 'favorite' %}" class="menu__link">Favorite</a>
@@ -92,15 +92,9 @@
                                                         <img src="{% static 'music/img/tracks/plus.png' %}"
                                                              alt="">
                                                     </a>
-                                                    {% if composition.is_liked %}
-                                                    <a href="{% url 'remove' composition.pk %}" class="button__like">
-                                                        <img src="{% static 'music/img/heart 2.png' %}" alt="">
-                                                    </a>
-                                                    {% else %}
-                                                    <a href="{% url 'add' composition.pk 5 %}" class="button__like">
+                                                    <a href="{% url 'like' composition.pk %}" class="button__like">
                                                         <img src="{% static 'music/img/tracks/like.png' %}" alt="">
                                                     </a>
-                                                    {% endif %}
                                                 </div>
                                             </div>
                                         </div>
@@ -158,15 +152,9 @@
                                 <img src="{% static 'music/img/play/plus-small 1.png' %}"
                                      alt="">
                             </a>
-                            {% if played.is_liked %}
-                            <a href="{% url 'remove' played.pk %}" class="play__like">
-                                <img src="{% static 'music/img/heart 2.png' %}" alt="">
-                            </a>
-                            {% else %}
-                            <a href="{% url 'add' played.pk 5 %}" class="play__like">
+                            <a href="{% url 'like' played.pk %}" class="play__like">
                                 <img src="{% static 'music/img/tracks/like.png' %}" alt="">
                             </a>
-                            {% endif %}
                         </div>
                     </div>
                 </div>

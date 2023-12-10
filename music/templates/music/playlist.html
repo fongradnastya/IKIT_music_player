@@ -29,10 +29,10 @@
                                 <a href="{% url 'tracks' %}" class="menu__link">Tracks</a>
                             </li>
                             <li>
-                                <a href="{% url 'home' %}" class="menu__link current__item">Playlists</a>
+                                <a href="{% url 'home' %}" class="menu__link">Playlists</a>
                             </li>
                             <li>
-                                <a href="{% url 'favorite' %}" class="menu__link">Favorite</a>
+                                <a href="{% url 'favorite' %}" class="menu__link current__item">Favorite</a>
                             </li>
                         </ul>
                         <div class="header__info">
@@ -114,19 +114,6 @@
                                                                 </div>
                                                             </div>
                                                             <div class="buttons">
-                                                                {% if track.composition.is_liked %}
-                                                                <a href="{% url 'delete' 5 track.pk %}"
-                                                                   class="button__like">
-                                                                    <img src="{% static 'music/img/heart 2.png' %}"
-                                                                         alt="">
-                                                                </a>
-                                                                {% else %}
-                                                                <a href="{% url 'add' track.pk 5 %}"
-                                                                   class="button__like">
-                                                                    <img src="{% static 'music/img/tracks/like.png' %}"
-                                                                         alt="">
-                                                                </a>
-                                                                {% endif %}
                                                                 {% if playlist.pk != 5 %}
                                                                 <a href="{% url 'delete' playlist.pk track.pk %}"
                                                                    class="button__minus">
@@ -192,15 +179,6 @@
                                 <img src="{% static 'music/img/play/plus-small 1.png' %}"
                                      alt="">
                             </a>
-                            {% if connect.composition.is_liked %}
-                            <a href="{% url 'remove' connect.composition.pk %}" class="play__like">
-                                <img src="{% static 'music/img/heart 2.png' %}" alt="">
-                            </a>
-                            {% else %}
-                            <a href="{% url 'add' connect.composition.pk 5 %}" class="play__like">
-                                <img src="{% static 'music/img/tracks/like.png' %}" alt="">
-                            </a>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
