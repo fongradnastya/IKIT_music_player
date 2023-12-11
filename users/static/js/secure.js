@@ -1,16 +1,48 @@
-const form = document.forms.main;
-form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    console.log("submit");
-    validateForm();
+const registrationForm = document.forms.registration;
+const loginForm = document.forms.login;
+const usernameField = $('.user__name');
+
+if(registrationForm){
+    registrationForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        validateRegistration();
+    })
+}
+else if(loginForm){
+    loginForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        validateLogin();
+    })
+}
+
+$(document).ready(function() {
+    if(usernameField){
+        getUsername()
+    }
 })
 
-async function validateForm(){
-    let pass1 = form.password.value;
-    let pass2 = form.password_confirm.value;
+async function validateLogin(){
+    const username = loginForm.username.value;
+    const password = loginForm.password.value;
+    if(username !== "" && password !== ""){
+        try {
+            let sharedKey = await getSharedKey();
+            console.log('Key' + sharedKey);
+            let {key, iv} = await convertKey(sharedKey);
+            // Encrypt the text
+            await sendLoginData(username, password, key, iv);
+        } catch(error) {
+            console.error('An error occurred:', error);
+        }
+    }
+}
+
+async function validateRegistration(){
+    let pass1 = registrationForm.password.value;
+    let pass2 = registrationForm.password_confirm.value;
     if(pass1 === pass2){
-        let username = form.username.value;
-        let email = form.email.value;
+        let username = registrationForm.username.value;
+        let email = registrationForm.email.value;
         if(username !== "" && email !== ""){
             try {
                 let sharedKey = await getSharedKey();
@@ -28,10 +60,53 @@ async function validateForm(){
     }
 }
 
+async function sendLoginData(username, password, key, iv){
+    let encryptedName = await encrypt(username, key, iv);
+    let encryptedPassword = await encrypt(password, key, iv);
+    let data = {
+        iv: btoa(String.fromCharCode.apply(null, iv)),
+        username: encryptedName,
+        password: encryptedPassword
+    };
+    fetch('http://127.0.0.1:8000/users/receive-login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    }).then(data => {
+        // If the user was created successfully, redirect to the login page
+        if (data.status === 'success') {
+            console.log('Success:', data);
+            console.log('Session ID:', getCookie('sessionid'));
+            window.location.href = 'http://127.0.0.1:8000/users';
+            //getHomePage();
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function getCookie(name) {
+    let cookieArr = document.cookie.split(";");
+    for(let i = 0; i < cookieArr.length; i++) {
+        let cookiePair = cookieArr[i].split("=");
+        if(name === cookiePair[0].trim()) {
+            return decodeURIComponent(cookiePair[1]);
+        }
+    }
+    return null;
+}
+
 async function sendRegistrationData(key, iv){
-    let username = form.username.value;
-    let email = form.email.value;
-    let password = form.password.value;
+    let username = registrationForm.username.value;
+    let email = registrationForm.email.value;
+    let password = registrationForm.password.value;
 
     // Encrypt the data
     let encryptedName = await encrypt(username, key, iv);
@@ -60,11 +135,26 @@ async function sendRegistrationData(key, iv){
         return response.json();
     }).then(data => {
         console.log('Success:', data);
+        // If the user was created successfully, redirect to the login page
+        if (data.status === 'success') {
+            window.location.href = '/users/login';
+        }
     }).catch(error => {
         console.error('Error:', error);
     });
 }
 
+async function getUsername(){
+    const url = 'http://127.0.0.1:8000/users/get-username'
+    let response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',  // This is required to send cookies
+    });
+    let data = await response.json();
+    console.log(data);
+    console.log(data.username);
+    usernameField.text(data.username);
+}
 
 // Function to perform modular exponentiation
 function modPow(base, exponent, modulus) {
@@ -87,7 +177,8 @@ function countSharedSecret(serverPublicKey, p, q) {
     let privateKey = 0;
     while(publicKey === 1){
         privateKey = Math.floor(Math.random() * p);
-        sharedSecret = modPow(serverPublicKey, privateKey, p);
+        //sharedSecret = modPow(serverPublicKey, privateKey, p);
+        sharedSecret = 100;
         publicKey = modPow(q, privateKey, p);
     }
     console.log('Public' + publicKey)

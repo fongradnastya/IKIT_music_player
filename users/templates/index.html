@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="shortcut icon" href="{% static 'music/img/icon.png' %}" type="image/x-icon">
+        <link href="https://fonts.googleapis.com/css2?family=Krona+One&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,100&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'music/css/style.css' %}">
+        <title>Home</title>
+    </head>
+    <body>
+        <div class="wrapper">
+            <header class="header">
+                <div class="header__container container">
+                    <a href="{% url 'home' %}" class="header__logo">
+                        <img src="{% static 'music/img/logo.png' %}" alt="IKIT music">
+                    </a>
+                    <nav class="header__menu menu">
+                        <ul class="menu__list">
+                            <li>
+                                <a href="{% url 'tracks' %}" class="menu__link">Tracks</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'home' %}" class="menu__link current__item">Playlists</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'favorite' %}" class="menu__link">Favorite</a>
+                            </li>
+                        </ul>
+                        <div class="header__info">
+                            <div class="header__user">
+                                <img src="{% static 'music/img/user.png' %}" alt="profile">
+                            </div>
+                            <div class="user__info">
+                                <div class="user__name"></div>
+                                <a href="{% url 'logout' %}" class="menu__link">Logout</a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </header>
+            <main class="page">
+                <section class="page__main-block main-block">
+                    <div class="main-block__container container">
+                        <div class="main-block__body">
+                            <div class="flex-container">
+                                <h1 class="main-block__title">
+                                    Playlists
+                                </h1>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+        <script src="{% static 'js/secure.js' %}"></script>
+        </div>
+    </body>
+</html>

@@ -1,8 +1,8 @@
 from django.http import HttpResponseNotFound, HttpResponse, \
-    HttpResponseForbidden
+    HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect
 
-from users.models import User
+from users.models import User, Session
 from .functions import *
 from .forms import *
 from django.db.models.signals import post_save
@@ -13,22 +13,6 @@ def create_default_playlist(sender, instance, created, **kwargs):
     if created:
         Playlist.objects.create(owner=instance, name='Favorite',
                                 is_default=True)
-
-
-def index(request):
-    if 'user_id' not in request.session:
-        return redirect('login')
-
-    user = User.objects.get(id=request.session['user_id'])
-
-    playlists = Playlist.objects.all().filter(owner=user)
-    context = {
-        'playlists': playlists,
-        "playlist": None,
-        "connection": None,
-        "username": user.username,
-    }
-    return render(request, "music/index.html", context)
 
 
 def tracks(request):

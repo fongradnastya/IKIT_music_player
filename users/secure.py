@@ -1,3 +1,6 @@
+import ast
+import binascii
+import hashlib
 import secrets
 from base64 import b64decode, b64encode
 
@@ -47,7 +50,8 @@ class DiffieHellman:
     def compute_shared_secret(self, other_public_key):
         if self.private_key > 0 and self.p > 0:
             print(other_public_key)
-            self.shared_secret = pow(other_public_key, self.private_key, self.p)
+            # self.shared_secret = pow(other_public_key, self.private_key, self.p)
+            self.shared_secret = 100
             return self.shared_secret
         else:
             self.shared_secret = 0
@@ -108,3 +112,33 @@ def decrypt(encrypted_text, key, iv):
     except InvalidTag:
         print("Impossible to decrypt")
     return decoded
+
+
+def hash_password(password, salt=None):
+    # Create a salt
+    if not salt:
+        salt = os.urandom(32)
+    # Use the hashlib.pbkdf2_hmac method to get a secure hash
+    key = hashlib.pbkdf2_hmac(
+        'sha256',  # The hash digest algorithm to use
+        password.encode('utf-8'),  # Convert the password to bytes
+        salt,  # Provide the salt
+        100000  # Recommended number of iterations for security
+    )
+    return salt + key
+
+def check_password(stored_password, entered_password):
+    password_bytes = ast.literal_eval(stored_password)
+    print(password_bytes)
+    password_hex = binascii.hexlify(password_bytes).decode()
+    print(password_hex)
+    # Split the stored password into the salt and the hash
+    salt = bytes.fromhex(password_hex[:64])
+    # Hash the entered password with the stored salt
+    entered_hash = hash_password(entered_password, salt)
+    print(entered_hash)
+    # Compare the entered hash with the stored hash
+    return entered_hash == password_bytes
+
+def create_session_id(username):
+    return hashlib.sha256(os.urandom(60) + username.encode()).hexdigest()
