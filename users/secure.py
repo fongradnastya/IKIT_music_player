@@ -47,6 +47,9 @@ class DiffieHellman:
         self.public_key = pow(self.q, self.private_key, self.p)
         return self.public_key, self.p, self.q
 
+    def get_public_key(self):
+        return self.public_key, self.p, self.q
+
     def compute_shared_secret(self, other_public_key):
         if self.private_key > 0 and self.p > 0:
             print(other_public_key)
@@ -56,7 +59,7 @@ class DiffieHellman:
         else:
             self.shared_secret = 0
 
-    def get_key(self):
+    def get_shared_secret(self):
         return self.shared_secret
 
 

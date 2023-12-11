@@ -35,7 +35,7 @@
                                 <img src="{% static 'music/img/user.png' %}" alt="profile">
                             </div>
                             <div class="user__info">
-                                <div class="user__name">{{ username }}</div>
+                                <div class="user__name"></div>
                                 <a href="{% url 'logout' %}" class="menu__link">Logout</a>
                             </div>
                         </div>
@@ -51,7 +51,7 @@
                             </h1>
                             <div class="form">
                                 <div class="form__container">
-                                    <form action="{% url 'new' %}" method="post" name="main" enctype="multipart/form-data">
+                                    <form action="{% url 'new' %}" method="post" name="create" enctype="multipart/form-data">
                                         {% csrf_token %}
                                         {% for f in form %}
                                             <div class="form__input">
@@ -70,6 +70,7 @@
                 </section>
             </main>
         </div>
-        <script src="{% static 'music/JS/form.js' %}"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="{% static 'js/secure.js' %}"></script>
     </body>
 </html>

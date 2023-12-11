@@ -8,7 +8,7 @@ class AddPostForm(forms.ModelForm):
 
     class Meta:
         model = Playlist
-        fields = ("name", "description", "cover")
+        fields = ("name", "description")
         widgets = {
             "name": forms.TextInput(attrs={
                 'class': 'input', 'placeholder': "enter playlist name here"}),

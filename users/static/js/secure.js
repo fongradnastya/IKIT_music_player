@@ -1,6 +1,6 @@
 const registrationForm = document.forms.registration;
 const loginForm = document.forms.login;
-const usernameField = $('.user__name');
+const creationForm = document.forms.create;
 
 if(registrationForm){
     registrationForm.addEventListener('submit', (event) => {
@@ -14,12 +14,29 @@ else if(loginForm){
         validateLogin();
     })
 }
+else if(creationForm){
+    creationForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        validatePlaylist();
+    })
+}
 
-$(document).ready(function() {
-    if(usernameField){
-        getUsername()
+async function validatePlaylist(){
+    const name = creationForm.name.value;
+    const description = creationForm.description.value;
+    if(name !== '' && description !== ''){
+        try {
+            let sharedKey = await getSharedKey();
+            console.log('Key' + sharedKey);
+            let {key, iv} = await convertKey(sharedKey);
+            // Encrypt the text
+            await sendPlaylistData(name, description, key, iv);
+        } catch(error) {
+            console.error('An error occurred:', error);
+        }
     }
-})
+}
+
 
 async function validateLogin(){
     const username = loginForm.username.value;
@@ -60,6 +77,30 @@ async function validateRegistration(){
     }
 }
 
+async function sendPlaylistData(name, description, key, iv){
+    let encryptedName = await encrypt(name, key, iv);
+    let encryptedDescription = await encrypt(description, key, iv);
+    let data = {
+        iv: btoa(String.fromCharCode.apply(null, iv)),
+        name: encryptedName,
+        description: encryptedDescription
+    };
+    const response = await fetch('/users/receive-playlist', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    if (!response.ok) {
+        throw new Error('Error creating playlist');
+    }
+    const newData = await response.json();
+    if (newData.status === 'success') {
+        window.location.href = '/users';
+    }
+}
+
 async function sendLoginData(username, password, key, iv){
     let encryptedName = await encrypt(username, key, iv);
     let encryptedPassword = await encrypt(password, key, iv);
@@ -68,28 +109,22 @@ async function sendLoginData(username, password, key, iv){
         username: encryptedName,
         password: encryptedPassword
     };
-    fetch('http://127.0.0.1:8000/users/receive-login', {
+    const response = await fetch('/users/receive-login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    }).then(data => {
-        // If the user was created successfully, redirect to the login page
-        if (data.status === 'success') {
-            console.log('Success:', data);
-            console.log('Session ID:', getCookie('sessionid'));
-            window.location.href = 'http://127.0.0.1:8000/users';
-            //getHomePage();
-        }
-    }).catch(error => {
-        console.error('Error:', error);
-    });
+    })
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    const newData = await response.json();
+    if (newData.status === 'success') {
+        console.log('Success:', newData);
+        console.log('Session ID:', getCookie('sessionid'));
+        window.location.href = '/users';
+    }
 }
 
 function getCookie(name) {
@@ -122,7 +157,7 @@ async function sendRegistrationData(key, iv){
     };
 
     // Send the data to the server
-    fetch('http://127.0.0.1:8000/users/receive-registration', {
+    fetch('/users/receive-registration', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -142,18 +177,6 @@ async function sendRegistrationData(key, iv){
     }).catch(error => {
         console.error('Error:', error);
     });
-}
-
-async function getUsername(){
-    const url = 'http://127.0.0.1:8000/users/get-username'
-    let response = await fetch(url, {
-        method: 'GET',
-        credentials: 'include',  // This is required to send cookies
-    });
-    let data = await response.json();
-    console.log(data);
-    console.log(data.username);
-    usernameField.text(data.username);
 }
 
 // Function to perform modular exponentiation
@@ -186,7 +209,6 @@ function countSharedSecret(serverPublicKey, p, q) {
     return {sharedSecret, publicKey}
 }
 
-
 async function getSharedKey(){
     try {
         let {serverPublicKey, p, q} = await receiveServerPublicKey();
@@ -201,7 +223,7 @@ async function getSharedKey(){
 }
 
 async function sendClientPublicKey(publicKey){
-    let url = 'http://127.0.0.1:8000/users/receive-public-key';
+    let url = '/users/receive-public-key';
     let data = {publicKey: publicKey}; // data to be sent to the server
 
     // Send the data to the server
@@ -223,7 +245,7 @@ async function sendClientPublicKey(publicKey){
 
 async function receiveServerPublicKey() {
     // The URL of your server
-    const url = 'http://127.0.0.1:8000/users/get-public-key';
+    const url = '/users/get-public-key';
     try {
         let response = await fetch(url);
         if (!response.ok) {
@@ -240,7 +262,6 @@ async function receiveServerPublicKey() {
         console.error('An error occurred:', error);
     }
 }
-
 
 async function convertKey(secretKey){
     console.log('Started');
@@ -281,28 +302,4 @@ async function encrypt(text, key, iv) {
     const encryptedDataArray = new Uint8Array(encryptedData);
     console.log(encryptedDataArray)
     return btoa(String.fromCharCode.apply(null, encryptedDataArray));
-}
-
-async function decrypt(text, key, iv){
-    // Decode the Base64 string back into an ArrayBuffer
-    const encryptedDataWithTagArray = Uint8Array.from(atob(text), c => c.charCodeAt(0));
-
-    // Separate the encrypted data and the tag
-    const encryptedDataArray = encryptedDataWithTagArray.slice(0, -16);
-    const tagArray = encryptedDataWithTagArray.slice(-16);
-
-    // Decrypt the data
-    const decryptedData = await window.crypto.subtle.decrypt(
-        {
-            name: 'AES-GCM',
-            iv: iv,
-            additionalData: tagArray.buffer
-        },
-        key,
-        encryptedDataArray.buffer
-    );
-
-    const decoded = new TextDecoder().decode(decryptedData);
-    console.log(decoded);
-    return decoded;
 }

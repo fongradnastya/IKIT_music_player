@@ -136,7 +136,7 @@ def create_playlist(request):
         "form": form,
         'username': user.username,
     }
-    return render(request, "music/form.html", context)
+    return render(request, "music/../users/templates/create.html", context)
 
 
 def new_track(request, playlist_id, track_order):
@@ -161,7 +161,7 @@ def new_track(request, playlist_id, track_order):
         "connection": connection,
         'username': user.username,
     }
-    return render(request, "music/index.html", context)
+    return render(request, "music/../users/templates/index.html", context)
 
 
 def delete_track(request, playlist_id, track_id):
@@ -205,7 +205,7 @@ def delete_playlist(request, deleted_id):
         "composition": None,
         'username': user.username,
     }
-    return render(request, "music/index.html", context)
+    return render(request, "music/../users/templates/index.html", context)
 
 
 def choose_playlist(request, track_id):

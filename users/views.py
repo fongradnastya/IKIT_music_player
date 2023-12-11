@@ -5,7 +5,9 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+from django.core import serializers
 
+from music.forms import AddPostForm
 from music.models import Playlist
 from users.forms import RegisterForm, LoginForm
 from users.models import User, Session
@@ -21,12 +23,6 @@ def login(request):
 def register(request):
     form = RegisterForm()
     return render(request, 'register.html', {'form': form})
-
-
-def logout(request):
-    if 'user_id' in request.session:
-        del request.session['user_id']
-    return redirect('login')
 
 
 def get_public_key(request):
@@ -53,7 +49,7 @@ def receive_public_key(request):
 def receive_registration_data(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        key = dh.get_key()
+        key = dh.get_shared_secret()
         key_hash = hash_key(key)
         iv = data.get('iv')
         username = decrypt(data.get('username'), key_hash, iv)
@@ -84,7 +80,7 @@ def receive_registration_data(request):
 def receive_login_data(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        key = dh.get_key()
+        key = dh.get_shared_secret()
         key_hash = hash_key(key)
         iv = data.get('iv')
         username = decrypt(data.get('username'), key_hash, iv)
@@ -132,14 +128,90 @@ def get_home_data(request):
         return JsonResponse({'status': 'failed',
                              'error': 'Invalid session ID'},
                             status=400)
-
-    """playlists = Playlist.objects.all().filter(owner=user)
+    public_key, p, q = dh.get_public_key()
+    shared_secret = hash_key(dh.get_shared_secret())
+    username, iv = encrypt(user.username, shared_secret)
+    playlists = Playlist.objects.all().filter(owner=user)
+    data = serializers.serialize('json', playlists)
     context = {
-        'playlists': playlists,
-        "username": user.username,
-    }"""
-    return JsonResponse({'status': 'success', 'username': user.username},
-                        status=200)
+        'status': 'success',
+        'playlists': data,
+        'username': username,
+        'publicKey': public_key,
+        'p': p,
+        'q': q,
+        'iv': iv
+    }
+    return JsonResponse(context, status=200)
+
+@csrf_exempt
+def logout(request):
+    if request.method == 'POST':
+        session_id = request.COOKIES.get('sessionid')
+        if session_id:
+            try:
+                session = Session.objects.get(session_id=session_id)
+                session.delete()
+
+                response = JsonResponse({'status': 'success',
+                                         'message': 'User logged out successfully'},
+                                        status=200)
+                response.delete_cookie('sessionid')
+                return response
+            except Session.DoesNotExist:
+                return JsonResponse({'status': 'failed',
+                                     'error': 'Invalid session ID'}, status=400)
+        else:
+            return JsonResponse({'status': 'failed',
+                                 'error': 'No session ID found in cookies'}, status=400)
+    else:
+        return JsonResponse({'status': 'failed',
+                             'error': 'Invalid request method'}, status=400)
 
 def index(request):
-    return render(request, 'index.html')
+    session_id = request.COOKIES.get('sessionid')
+    if session_id:
+        try:
+            Session.objects.get(session_id=session_id)
+            return render(request, 'index.html')
+        except Session.DoesNotExist:
+            print("Redirecting")
+    return redirect('login')
+
+def create_playlist(request):
+    session_id = request.COOKIES.get('sessionid')
+    if session_id:
+        try:
+            Session.objects.get(session_id=session_id)
+            form = AddPostForm()
+            return render(request, 'create.html',
+                          {'form': form})
+        except Session.DoesNotExist:
+            print("Redirecting")
+    return redirect('login')
+
+@csrf_exempt
+def receive_playlist_data(request):
+    session_id = request.COOKIES.get('sessionid')
+    if request.method == 'POST' and session_id:
+        session = Session.objects.get(session_id=session_id)
+        user = session.user
+        data = json.loads(request.body)
+        key = dh.get_shared_secret()
+        key_hash = hash_key(key)
+        iv = data.get('iv')
+        name = decrypt(data.get('name'), key_hash, iv)
+        description = decrypt(data.get('description'), key_hash, iv)
+        print(name, description)
+        if name and description:
+            playlist = Playlist(name=name, description=description,
+                                is_default=False, owner=user)
+            playlist.save()
+            return JsonResponse({'status': 'success',
+                                     'message': 'Playlist created successfully.'}, status=200)
+        return JsonResponse({'status': 'failed',
+                             'error': 'Impossible to decrypt'}, status=400)
+    else:
+        return JsonResponse({'status': 'failed',
+                             'error': 'Invalid request method'}, status=400)
+
