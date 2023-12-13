@@ -1,6 +1,7 @@
 const registrationForm = document.forms.registration;
 const loginForm = document.forms.login;
 const creationForm = document.forms.create;
+const usernameField = $('.user__name');
 
 if(registrationForm){
     registrationForm.addEventListener('submit', (event) => {
@@ -15,6 +16,10 @@ else if(loginForm){
     })
 }
 else if(creationForm){
+    $(document).ready(function() {
+        $('.logout').on('click', logout);
+        getName();
+    });
     creationForm.addEventListener('submit', (event) => {
         event.preventDefault();
         validatePlaylist();
@@ -24,6 +29,10 @@ else if(creationForm){
 async function validatePlaylist(){
     const name = creationForm.name.value;
     const description = creationForm.description.value;
+    let playlist = (name === "") ? "Playlist name can't be empty" : "";
+    $('.name-error').text(playlist);
+    let desc = (description === "") ? "Description can't be empty" : "";
+    $('.description-error').text(desc);
     if(name !== '' && description !== ''){
         try {
             let sharedKey = await getSharedKey();
@@ -37,10 +46,13 @@ async function validatePlaylist(){
     }
 }
 
-
 async function validateLogin(){
     const username = loginForm.username.value;
     const password = loginForm.password.value;
+    let user = (username === "") ? "Username can't be empty" : "";
+    $('.username-error').text(user);
+    let pass = (password === "") ? "Password can't be empty" : "";
+    $('.password-error').text(pass);
     if(username !== "" && password !== ""){
         try {
             let sharedKey = await getSharedKey();
@@ -56,10 +68,19 @@ async function validateLogin(){
 
 async function validateRegistration(){
     let pass1 = registrationForm.password.value;
-    let pass2 = registrationForm.password_confirm.value;
+    let pass2 = registrationForm.passwordConfirm.value;
     if(pass1 === pass2){
+        $('.error').text("");
         let username = registrationForm.username.value;
         let email = registrationForm.email.value;
+        let mail = (email === "") ? "Email can't be empty" : "";
+        $('.email-error').text(mail);
+        let user = (username === "") ? "Username can't be empty" : "";
+        $('.username-error').text(user);
+        let pass = (pass1 === "") ? "Password can't be empty" : "";
+        $('.password-error').text(pass);
+        let conf = (pass2 === "") ? "Password can't be empty" : "";
+        $('.confirm-error').text(conf);
         if(username !== "" && email !== ""){
             try {
                 let sharedKey = await getSharedKey();
@@ -73,7 +94,40 @@ async function validateRegistration(){
         }
     }
     else{
-        console.log("Not correct");
+        $('.error').text("Passwords don't mach");
+    }
+}
+
+async function getName(){
+    const url = 'http://127.0.0.1:8000/users/get-username'
+    let response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',  // This is required to send cookies
+    });
+    let data = await response.json();
+    console.log(data);
+    const username = data.username;
+    console.log('Username ' + username);
+    if(username){
+        const text = base64ToArrayBuffer(username)
+        const iv = base64ToArrayBuffer(data.iv);
+        const p = data.p;
+        const q = data.q;
+        const serverPublicKey = data.publicKey;
+        let {sharedSecret, publicKey} =
+            countSharedSecret(serverPublicKey, p, q);
+        let {key, _} = await convertKey(sharedSecret);
+        try{
+            let name = await decrypt(text, key, iv);
+            console.log(name);
+            usernameField.text(name);
+        }
+        catch(exception){
+            console.error(exception);
+        }
+    }
+    else{
+        window.location.href = '/users/login';
     }
 }
 
@@ -92,12 +146,13 @@ async function sendPlaylistData(name, description, key, iv){
         },
         body: JSON.stringify(data)
     })
-    if (!response.ok) {
-        throw new Error('Error creating playlist');
-    }
     const newData = await response.json();
     if (newData.status === 'success') {
         window.location.href = '/users';
+    }
+    else{
+        $('.error').text(newData.error);
+        console.log(newData.error);
     }
 }
 
@@ -116,18 +171,20 @@ async function sendLoginData(username, password, key, iv){
         },
         body: JSON.stringify(data)
     })
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
     const newData = await response.json();
     if (newData.status === 'success') {
         console.log('Success:', newData);
         console.log('Session ID:', getCookie('sessionid'));
         window.location.href = '/users';
+        $('.error').text("");
+    }
+    else{
+        $('.error').text(newData.error);
+        console.log(newData.error);
     }
 }
 
-function getCookie(name) {
+function getCookie(name){
     let cookieArr = document.cookie.split(";");
     for(let i = 0; i < cookieArr.length; i++) {
         let cookiePair = cookieArr[i].split("=");
@@ -142,41 +199,32 @@ async function sendRegistrationData(key, iv){
     let username = registrationForm.username.value;
     let email = registrationForm.email.value;
     let password = registrationForm.password.value;
-
     // Encrypt the data
     let encryptedName = await encrypt(username, key, iv);
     let encryptedEmail = await encrypt(email, key, iv);
     let encryptedPassword = await encrypt(password, key, iv);
-
     // Prepare the data to send to the server
     let data = {
-        iv: btoa(String.fromCharCode.apply(null, iv)), // Convert the IV to a Base64 string
+        iv: btoa(String.fromCharCode.apply(null, iv)),
         username: encryptedName,
         email: encryptedEmail,
         password: encryptedPassword
     };
-
-    // Send the data to the server
-    fetch('/users/receive-registration', {
+    const response = await fetch('/users/receive-registration', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    }).then(data => {
-        console.log('Success:', data);
-        // If the user was created successfully, redirect to the login page
-        if (data.status === 'success') {
-            window.location.href = '/users/login';
-        }
-    }).catch(error => {
-        console.error('Error:', error);
-    });
+    })
+    const newData = await response.json();
+    if (data.status === 'success') {
+        window.location.href = '/users/login';
+    }
+    else{
+        $('.error').text(newData.error);
+        console.log(newData.error);
+    }
 }
 
 // Function to perform modular exponentiation
@@ -302,4 +350,53 @@ async function encrypt(text, key, iv) {
     const encryptedDataArray = new Uint8Array(encryptedData);
     console.log(encryptedDataArray)
     return btoa(String.fromCharCode.apply(null, encryptedDataArray));
+}
+
+function base64ToArrayBuffer(base64) {
+    const binaryString = window.atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+
+async function decrypt(text, key, iv){
+    // Decode the Base64 string back into an ArrayBuffer
+    const encryptedData = new Uint8Array(text);;
+
+    // Separate the encrypted data and the tag
+    console.log(encryptedData);
+    // Decrypt the data
+    const decryptedData = await window.crypto.subtle.decrypt(
+        {
+            name: 'AES-GCM',
+            iv: iv,
+        },
+        key,
+        encryptedData.buffer
+    );
+
+    const decoded = new TextDecoder().decode(decryptedData);
+    console.log(decoded);
+    return decoded;
+}
+
+async function logout(){
+    const response = await fetch('/users/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')  // Assuming you have a function to get cookies
+        },
+        credentials: 'include'  // To include cookies in the request
+    })
+    const data = await response.json()
+    if (data.status === 'success') {
+        console.log('Logged out successfully');
+        window.location.href = '/users/login';
+    } else {
+        console.error('Logout failed:', data.error);
+    }
 }

@@ -4,7 +4,7 @@ console.log(usernameField);
 $(document).ready(function() {
     if(usernameField){
         $('.logout').on('click', logout);
-        getUsername().then(() => {
+        getPlaylist().then(() => {
             $('.slider').slick({
             slidesToShow: 4,
         });
@@ -30,8 +30,8 @@ async function logout(){
     }
 }
 
-async function getUsername(){
-    const url = 'http://127.0.0.1:8000/users/get-username'
+async function getPlaylist(){
+    const url = 'http://127.0.0.1:8000/users/get-home-data'
     let response = await fetch(url, {
         method: 'GET',
         credentials: 'include',  // This is required to send cookies
@@ -39,12 +39,12 @@ async function getUsername(){
     let data = await response.json();
     console.log(data);
     const username = data.username;
-    const playlists = await JSON.parse(data.playlists);
-    console.log('Playlists ' + playlists);
+    const playlistNames = await JSON.parse(data.playlists);
+    console.log('Playlists ' + playlistNames);
     console.log('Username ' + username);
     if(username){
         console.log(username);
-        const text = base64ToArrayBuffer(username)
+        const text= base64ToArrayBuffer(username)
         const iv = base64ToArrayBuffer(data.iv);
         const p = data.p;
         const q = data.q;
@@ -60,11 +60,25 @@ async function getUsername(){
         catch(exception){
             console.error(exception);
         }
+        let names = [];
+        for(let i = 0; i < playlistNames.length; i++) {
+            const playlist =
+                base64ToArrayBuffer(playlistNames[i]);
+            try{
+                let name = await decrypt(playlist, key, iv);
+                console.log(name);
+                names.push(name);
+            }
+            catch(exception){
+                console.error(exception);
+            }
+        }
+        addPlaylists(names);
     }
     else{
         window.location.href = '/users/login';
     }
-    addPlaylists(playlists);
+
 }
 
 function addPlaylists(playlists){
@@ -77,13 +91,12 @@ function addPlaylists(playlists){
         let link = document.createElement('a');
         link.href = '#';
         link.className = 'slider__link';
-        link.id = playlist.id;
 
         let imgDiv = document.createElement('div');
         imgDiv.className = 'img';
 
         let img = document.createElement('img');
-        img.src = '/media/' + playlist.fields.cover;
+        img.src = '/media/photos/2022/11/07/cover_DGDvHzB.png';
         img.alt = 'new tracks';
         img.className = 'playlist-cover';
 
@@ -101,7 +114,7 @@ function addPlaylists(playlists){
         playButton.className = 'track__play play__button';
 
         let p = document.createElement('p');
-        p.textContent = playlist.fields.name;
+        p.textContent = playlist;
         // Append elements
         firstDiv.appendChild(playButton);
         a.appendChild(firstDiv);

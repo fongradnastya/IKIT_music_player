@@ -33,30 +33,33 @@
                                             <label for="inputEmail" class="form__header">Email</label>
                                             <input type="email" class="input" id="inputEmail" aria-describedby="usernameHelp"
                                                    placeholder="Enter your email" name="email">
-                                            {{ form.email.errors }}
+                                            <div class="email-error"></div>
                                         </div>
                                         <div class="form__input">
                                             <label for="inputUsername" class="form__header">Username</label>
                                             <input type="text" class="input" id="inputUsername" aria-describedby="emailHelp"
                                                    placeholder="Create a username" name="username">
-                                            {{ form.username.errors }}
+                                            <div class="username-error">
+
+                                            </div>
                                         </div>
                                         <div class="form__input">
                                             <label for="inputPassword" class="form__header">Password</label>
                                             <input type="password" class="input" id="inputPassword"
                                                    placeholder="Enter your password" name="password">
-                                            {{ form.password.errors }}
+                                            <div class="password-error">
+
+                                            </div>
                                         </div>
                                         <div class="form__input">
                                             <label for="inputPassword2" class="form__header">Repeated password</label>
                                             <input type="password" class="input" id="inputPassword2"
-                                                   placeholder="Repeat your password" name="password_confirm">
-                                            {{ form.password_confirm.errors }}
+                                                   placeholder="Repeat your password" name="passwordConfirm">
+                                            <div class="confirm-error">
+
+                                            </div>
                                         </div>
                                         <div class="error">
-                                            {% if form.non_field_errors %}
-                                                {{ form.non_field_errors }}
-                                            {% endif %}
                                         </div>
                                         <a href="{% url 'login' %}" class="register">Already have an account? Login</a>
                                         <button type="submit" class="save" name="submit">Sign up</button>

@@ -1,6 +1,6 @@
 import json
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -57,19 +57,22 @@ def receive_registration_data(request):
         password = decrypt(data.get('password'), key_hash, iv)
         print(username, email, password)
         if username and email and password:
-            try:
-                # Check if a user with the same username or email already exists
-                User.objects.get(Q(username=username) | Q(email=email))
+            if User.objects.filter(email=email).exists():
                 return JsonResponse({'status': 'failed',
-                                        'error': 'A user with this username or email already exists.'},
+                                     'error': 'A user with this email already exists.'},
                                     status=400)
-            except ObjectDoesNotExist:
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({'status': 'failed',
+                                     'error': 'A user with this username already exists.'},
+                                    status=400)
+            else:
                 password = hash_password(password)
                 print(password)
                 user = User(username=username, email=email, password=password)
                 user.save()
                 return JsonResponse({'status': 'success',
-                                     'message': 'User created successfully. You can now log in.'}, status=200)
+                                     'message': 'User created successfully. You can now log in.'},
+                                    status=200)
         return JsonResponse({'status': 'failed',
                              'error': 'Impossible to decrypt'}, status=400)
     else:
@@ -102,7 +105,7 @@ def receive_login_data(request):
                 return response
             else:
                 return JsonResponse({'status': 'failed',
-                                     'message': 'Invalid password'},
+                                     'error': 'Invalid password'},
                                     status=400)
         except ObjectDoesNotExist:
             return JsonResponse({'status': 'failed',
@@ -122,7 +125,7 @@ def get_home_data(request):
     try:
         # Get the session from the database
         session = Session.objects.get(session_id=session_id)
-        # Get the user from the session
+        # Get the user from the sessions
         user = session.user
     except Session.DoesNotExist:
         return JsonResponse({'status': 'failed',
@@ -132,10 +135,41 @@ def get_home_data(request):
     shared_secret = hash_key(dh.get_shared_secret())
     username, iv = encrypt(user.username, shared_secret)
     playlists = Playlist.objects.all().filter(owner=user)
-    data = serializers.serialize('json', playlists)
+    playlist_names = []
+    for playlist in playlists:
+        playlist_name, _ = encrypt(playlist.name, shared_secret, iv)
+        playlist_names.append(playlist_name)
+    data = json.dumps(playlist_names)
     context = {
         'status': 'success',
         'playlists': data,
+        'username': username,
+        'publicKey': public_key,
+        'p': p,
+        'q': q,
+        'iv': iv
+    }
+    return JsonResponse(context, status=200)
+
+@csrf_exempt
+def get_username(request):
+    session_id = request.COOKIES.get('sessionid')
+    if not session_id:
+        return JsonResponse({'status': 'failed',
+                             'error': 'No session ID provided'},
+                            status=400)
+    try:
+        session = Session.objects.get(session_id=session_id)
+        user = session.user
+    except Session.DoesNotExist:
+        return JsonResponse({'status': 'failed',
+                             'error': 'Invalid session ID'},
+                            status=400)
+    public_key, p, q = dh.get_public_key()
+    shared_secret = hash_key(dh.get_shared_secret())
+    username, iv = encrypt(user.username, shared_secret)
+    context = {
+        'status': 'success',
         'username': username,
         'publicKey': public_key,
         'p': p,
@@ -208,7 +242,7 @@ def receive_playlist_data(request):
                                 is_default=False, owner=user)
             playlist.save()
             return JsonResponse({'status': 'success',
-                                     'message': 'Playlist created successfully.'}, status=200)
+                                     'error': 'Playlist created successfully.'}, status=200)
         return JsonResponse({'status': 'failed',
                              'error': 'Impossible to decrypt'}, status=400)
     else:

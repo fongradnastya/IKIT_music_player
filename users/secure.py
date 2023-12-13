@@ -70,12 +70,12 @@ def hash_key(secret_key):
     return digest.finalize()
 
 
-def encrypt(text, key):
+def encrypt(text, key, iv=None):
     # Convert the text to bytes
     data = text.encode()
 
     # Generate a random initialization vector (IV)
-    iv = os.urandom(12)
+    iv = b64decode(iv) if iv else os.urandom(12)
 
     # Create a new AES-GCM cipher using the key
     cipher = Cipher(algorithms.AES(key), modes.GCM(iv),
