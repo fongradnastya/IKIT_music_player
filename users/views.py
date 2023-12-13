@@ -177,13 +177,11 @@ def get_username(request):
         return JsonResponse({'status': 'failed',
                              'error': 'Invalid session ID'},
                             status=400)
-    public_key, p, q = dh.get_public_key()
     shared_secret = hash_key(dh.get_shared_secret())
     username, iv = encrypt(user.username, shared_secret)
     context = {
         'status': 'success',
         'username': username,
-        'publicKey': public_key,
         'iv': iv
     }
     return JsonResponse(context, status=200)

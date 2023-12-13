@@ -65,6 +65,18 @@ async function validateLogin(){
     }
 }
 
+async function generateSharedSecret(){
+    const p = 23;
+    const q = 5;
+    const privateKey = Math.floor(Math.random() * p);
+    const publicKey = modPow(q, privateKey, p);
+    await sendClientPublicKey(publicKey, true);
+    const {serverPublicKey, a, b} = await receiveServerPublicKey(true);
+    const sharedSecret = modPow(serverPublicKey, privateKey, p);
+    console.log(p, q, privateKey, publicKey, sharedSecret);
+    return sharedSecret;
+}
+
 async function validateRegistration(){
     let pass1 = registrationForm.password.value;
     let pass2 = registrationForm.passwordConfirm.value;
@@ -97,6 +109,7 @@ async function validateRegistration(){
 }
 
 async function getName(){
+    const sharedSecret = await generateSharedSecret();
     const url = 'http://127.0.0.1:8000/users/get-username'
     let response = await fetch(url, {
         method: 'GET',
@@ -107,11 +120,6 @@ async function getName(){
     if(username){
         const text = base64ToArrayBuffer(username)
         const iv = base64ToArrayBuffer(data.iv);
-        const p = 23;
-        const q = 5;
-        const serverPublicKey = data.publicKey;
-        let {sharedSecret, publicKey} =
-            countSharedSecret(serverPublicKey, p, q);
         let {key, _} = await convertKey(sharedSecret);
         try{
             let name = await decrypt(text, key, iv);
@@ -263,8 +271,15 @@ async function getSharedKey(){
     }
 }
 
-async function sendClientPublicKey(publicKey){
-    let url = '/users/receive-public-key';
+async function sendClientPublicKey(publicKey, is_done=false){
+    let url = "";
+    if(is_done){
+        url = '/users/count-keys';
+    }
+    else{
+        url = '/users/receive-public-key';
+    }
+
     let data = {publicKey: publicKey}; // data to be sent to the server
 
     // Send the data to the server
@@ -284,9 +299,15 @@ async function sendClientPublicKey(publicKey){
     console.log('Success:', responseData);
 }
 
-async function receiveServerPublicKey() {
+async function receiveServerPublicKey(is_done=false) {
     // The URL of your server
-    const url = '/users/generate-public-key';
+    let url = '';
+    if(is_done){
+        url = '/users/get-public-key';
+    }
+    else{
+        url = '/users/generate-public-key';
+    }
     try {
         let response = await fetch(url);
         if (!response.ok) {

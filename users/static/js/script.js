@@ -152,8 +152,8 @@ async function generateSharedSecret(){
     const sharedSecret = modPow(serverPublicKey, privateKey, p);
     console.log(p, q, privateKey, publicKey, sharedSecret);
     return sharedSecret;
-
 }
+
 async function receiveServerPublicKey() {
     // The URL of your server
     const url = '/users/get-public-key';
