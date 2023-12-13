@@ -25,10 +25,13 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 
+def generate_public_key(request):
+    public_key, _, _ = dh.generate_public_key()
+    return JsonResponse({'public_key': public_key})
+
 def get_public_key(request):
-    public_key, p, q = dh.generate_public_key()
-    print(public_key, p, q)
-    return JsonResponse({'public_key': public_key, 'p': p, 'q': q})
+    public_key, _, _ = dh.get_public_key()
+    return JsonResponse({'public_key': public_key})
 
 
 @csrf_exempt
@@ -44,6 +47,19 @@ def receive_public_key(request):
         return JsonResponse({'status': 'failed',
                              'error': 'Invalid request method'})
 
+@csrf_exempt
+def count_keys(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        other_public_key = data.get('publicKey')
+        # Compute the shared secret
+        dh.generate_public_key()
+        shared_secret = dh.compute_shared_secret(other_public_key)
+        print('Shared secret:', shared_secret)
+        return JsonResponse({'status': 'success'})
+    else:
+        return JsonResponse({'status': 'failed',
+                             'error': 'Invalid request method'})
 
 @csrf_exempt
 def receive_registration_data(request):
@@ -131,7 +147,6 @@ def get_home_data(request):
         return JsonResponse({'status': 'failed',
                              'error': 'Invalid session ID'},
                             status=400)
-    public_key, p, q = dh.get_public_key()
     shared_secret = hash_key(dh.get_shared_secret())
     username, iv = encrypt(user.username, shared_secret)
     playlists = Playlist.objects.all().filter(owner=user)
@@ -144,9 +159,6 @@ def get_home_data(request):
         'status': 'success',
         'playlists': data,
         'username': username,
-        'publicKey': public_key,
-        'p': p,
-        'q': q,
         'iv': iv
     }
     return JsonResponse(context, status=200)
@@ -172,8 +184,6 @@ def get_username(request):
         'status': 'success',
         'username': username,
         'publicKey': public_key,
-        'p': p,
-        'q': q,
         'iv': iv
     }
     return JsonResponse(context, status=200)

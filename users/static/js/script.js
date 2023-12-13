@@ -1,5 +1,4 @@
 const usernameField = $('.user__name');
-console.log(usernameField);
 
 $(document).ready(function() {
     if(usernameField){
@@ -31,30 +30,21 @@ async function logout(){
 }
 
 async function getPlaylist(){
+    let sharedSecret = await generateSharedSecret();
     const url = 'http://127.0.0.1:8000/users/get-home-data'
     let response = await fetch(url, {
         method: 'GET',
         credentials: 'include',  // This is required to send cookies
     });
     let data = await response.json();
-    console.log(data);
     const username = data.username;
     const playlistNames = await JSON.parse(data.playlists);
-    console.log('Playlists ' + playlistNames);
-    console.log('Username ' + username);
     if(username){
-        console.log(username);
         const text= base64ToArrayBuffer(username)
         const iv = base64ToArrayBuffer(data.iv);
-        const p = data.p;
-        const q = data.q;
-        const serverPublicKey = data.publicKey;
-        let {sharedSecret, publicKey} =
-            countSharedSecret(serverPublicKey, p, q);
         let {key, _} = await convertKey(sharedSecret);
         try{
             let name = await decrypt(text, key, iv);
-            console.log(name);
             usernameField.text(name);
         }
         catch(exception){
@@ -66,7 +56,6 @@ async function getPlaylist(){
                 base64ToArrayBuffer(playlistNames[i]);
             try{
                 let name = await decrypt(playlist, key, iv);
-                console.log(name);
                 names.push(name);
             }
             catch(exception){
@@ -153,23 +142,59 @@ function modPow(base, exponent, modulus) {
     return result;
 }
 
-function countSharedSecret(serverPublicKey, p, q) {
-    let publicKey = 1;
-    let sharedSecret = 0;
-    let privateKey = 0;
-    while(publicKey === 1){
-        privateKey = Math.floor(Math.random() * p);
-        //sharedSecret = modPow(serverPublicKey, privateKey, p);
-        sharedSecret = 100;
-        publicKey = modPow(q, privateKey, p);
+async function generateSharedSecret(){
+    const p = 23;
+    const q = 5;
+    const privateKey = Math.floor(Math.random() * p);
+    const publicKey = modPow(q, privateKey, p);
+    await sendClientPublicKey(publicKey);
+    const {serverPublicKey, a, b} = await receiveServerPublicKey();
+    const sharedSecret = modPow(serverPublicKey, privateKey, p);
+    console.log(p, q, privateKey, publicKey, sharedSecret);
+    return sharedSecret;
+
+}
+async function receiveServerPublicKey() {
+    // The URL of your server
+    const url = '/users/get-public-key';
+    try {
+        let response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        let responseJson = await response.json();
+        let serverPublicKey = responseJson.public_key;
+        let p = 23;
+        let q = 5;
+        // Return the public key
+        return {serverPublicKey, p, q};
+    } catch (error) {
+        console.error('An error occurred:', error);
     }
-    console.log('Public' + publicKey)
-    console.log(sharedSecret);
-    return {sharedSecret, publicKey}
+}
+
+async function sendClientPublicKey(publicKey){
+    let url = '/users/count-keys';
+    let data = {publicKey: publicKey}; // data to be sent to the server
+
+    // Send the data to the server
+    let response = await fetch(url, {
+        method: 'POST', // or 'PUT'
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+
+    let responseData = await response.json();
+    console.log('Success:', responseData);
 }
 
 async function convertKey(secretKey){
-    console.log('Started');
     const encoder = new TextEncoder();
     const secretKeyBuffer = encoder.encode(secretKey);
 
@@ -184,7 +209,6 @@ async function convertKey(secretKey){
         false,
         ['encrypt', 'decrypt']
     );
-    console.log(key);
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
     return {key, iv};
 }
@@ -202,9 +226,6 @@ function base64ToArrayBuffer(base64) {
 async function decrypt(text, key, iv){
     // Decode the Base64 string back into an ArrayBuffer
     const encryptedData = new Uint8Array(text);;
-
-    // Separate the encrypted data and the tag
-    console.log(encryptedData);
     // Decrypt the data
     const decryptedData = await window.crypto.subtle.decrypt(
         {
@@ -216,6 +237,5 @@ async function decrypt(text, key, iv){
     );
 
     const decoded = new TextDecoder().decode(decryptedData);
-    console.log(decoded);
     return decoded;
 }

@@ -13,36 +13,12 @@ import os
 
 class DiffieHellman:
     def __init__(self):
-        self.p = 0
-        self.q = 0
+        self.p = 23
+        self.q = 5
         self.private_key = 0
         self.shared_secret = 0
 
-    def find_primitive_root(self):
-        print(1)
-        for g in range(2, 6):  # Check if 2 or 3 is a primitive root
-            print(g)
-            if pow(g, self.p - 1, self.p) == 1 and all(
-                    pow(g, k, self.p) != 1 for k in range(1, self.p - 1)):
-                return g
-        print(0)
-        return None
-
-    def primitive_check(self, g, p):
-        L = []
-        # Checks If The Entered Number Is A Primitive Root Or Not
-        for i in range(1, p):
-            L.append(pow(g, i) % p)
-        for i in range(1, p):
-            if L.count(i) > 1:
-                L.clear()
-                return -1
-            return 1
-
     def generate_public_key(self):
-        self.p = 32416190071
-        # Generate a random number for q
-        self.q = 2
         self.private_key = secrets.randbelow(self.p)
         self.public_key = pow(self.q, self.private_key, self.p)
         return self.public_key, self.p, self.q
@@ -52,9 +28,10 @@ class DiffieHellman:
 
     def compute_shared_secret(self, other_public_key):
         if self.private_key > 0 and self.p > 0:
-            print(other_public_key)
-            # self.shared_secret = pow(other_public_key, self.private_key, self.p)
-            self.shared_secret = 100
+            self.shared_secret = pow(other_public_key, self.private_key, self.p)
+            # self.shared_secret = 100
+            print(self.p, self.q, self.private_key, self.public_key,
+                  self.shared_secret)
             return self.shared_secret
         else:
             self.shared_secret = 0

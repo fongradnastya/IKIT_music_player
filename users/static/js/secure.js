@@ -56,7 +56,6 @@ async function validateLogin(){
     if(username !== "" && password !== ""){
         try {
             let sharedKey = await getSharedKey();
-            console.log('Key' + sharedKey);
             let {key, iv} = await convertKey(sharedKey);
             // Encrypt the text
             await sendLoginData(username, password, key, iv);
@@ -84,7 +83,6 @@ async function validateRegistration(){
         if(username !== "" && email !== ""){
             try {
                 let sharedKey = await getSharedKey();
-                console.log('Key' + sharedKey);
                 let {key, iv} = await convertKey(sharedKey);
                 // Encrypt the text
                 await sendRegistrationData(key, iv);
@@ -105,21 +103,18 @@ async function getName(){
         credentials: 'include',  // This is required to send cookies
     });
     let data = await response.json();
-    console.log(data);
     const username = data.username;
-    console.log('Username ' + username);
     if(username){
         const text = base64ToArrayBuffer(username)
         const iv = base64ToArrayBuffer(data.iv);
-        const p = data.p;
-        const q = data.q;
+        const p = 23;
+        const q = 5;
         const serverPublicKey = data.publicKey;
         let {sharedSecret, publicKey} =
             countSharedSecret(serverPublicKey, p, q);
         let {key, _} = await convertKey(sharedSecret);
         try{
             let name = await decrypt(text, key, iv);
-            console.log(name);
             usernameField.text(name);
         }
         catch(exception){
@@ -176,7 +171,6 @@ async function sendLoginData(username, password, key, iv){
         console.log('Success:', newData);
         console.log('Session ID:', getCookie('sessionid'));
         window.location.href = '/users';
-        $('.error').text("");
     }
     else{
         $('.error').text(newData.error);
@@ -248,12 +242,11 @@ function countSharedSecret(serverPublicKey, p, q) {
     let privateKey = 0;
     while(publicKey === 1){
         privateKey = Math.floor(Math.random() * p);
-        //sharedSecret = modPow(serverPublicKey, privateKey, p);
-        sharedSecret = 100;
+        sharedSecret = modPow(serverPublicKey, privateKey, p);
+        // sharedSecret = 100;
         publicKey = modPow(q, privateKey, p);
     }
-    console.log('Public' + publicKey)
-    console.log(sharedSecret);
+    console.log(p, q, privateKey, publicKey, sharedSecret);
     return {sharedSecret, publicKey}
 }
 
@@ -293,7 +286,7 @@ async function sendClientPublicKey(publicKey){
 
 async function receiveServerPublicKey() {
     // The URL of your server
-    const url = '/users/get-public-key';
+    const url = '/users/generate-public-key';
     try {
         let response = await fetch(url);
         if (!response.ok) {
@@ -301,9 +294,8 @@ async function receiveServerPublicKey() {
         }
         let responseJson = await response.json();
         let serverPublicKey = responseJson.public_key;
-        let p = responseJson.p;
-        let q = responseJson.q;
-        console.log(serverPublicKey, p, q);
+        let p = 23;
+        let q = 5;
         // Return the public key
         return {serverPublicKey, p, q};
     } catch (error) {
@@ -312,7 +304,6 @@ async function receiveServerPublicKey() {
 }
 
 async function convertKey(secretKey){
-    console.log('Started');
     const encoder = new TextEncoder();
     const secretKeyBuffer = encoder.encode(secretKey);
 
@@ -327,7 +318,6 @@ async function convertKey(secretKey){
         false,
         ['encrypt', 'decrypt']
     );
-    console.log(key);
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
     return {key, iv};
 }
@@ -348,7 +338,6 @@ async function encrypt(text, key, iv) {
 
     // Convert the encrypted data (including the tag) to a Base64 string
     const encryptedDataArray = new Uint8Array(encryptedData);
-    console.log(encryptedDataArray)
     return btoa(String.fromCharCode.apply(null, encryptedDataArray));
 }
 
@@ -367,7 +356,6 @@ async function decrypt(text, key, iv){
     const encryptedData = new Uint8Array(text);;
 
     // Separate the encrypted data and the tag
-    console.log(encryptedData);
     // Decrypt the data
     const decryptedData = await window.crypto.subtle.decrypt(
         {
