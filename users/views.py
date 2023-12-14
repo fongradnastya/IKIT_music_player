@@ -41,7 +41,6 @@ def receive_public_key(request):
         other_public_key = data.get('publicKey')
         # Compute the shared secret
         shared_secret = dh.compute_shared_secret(other_public_key)
-        print('Shared secret:', shared_secret)
         return JsonResponse({'status': 'success'})
     else:
         return JsonResponse({'status': 'failed',
@@ -55,7 +54,6 @@ def count_keys(request):
         # Compute the shared secret
         dh.generate_public_key()
         shared_secret = dh.compute_shared_secret(other_public_key)
-        print('Shared secret:', shared_secret)
         return JsonResponse({'status': 'success'})
     else:
         return JsonResponse({'status': 'failed',
@@ -71,7 +69,6 @@ def receive_registration_data(request):
         username = decrypt(data.get('username'), key_hash, iv)
         email = decrypt(data.get('email'), key_hash, iv)
         password = decrypt(data.get('password'), key_hash, iv)
-        print(username, email, password)
         if username and email and password:
             if User.objects.filter(email=email).exists():
                 return JsonResponse({'status': 'failed',
@@ -83,7 +80,6 @@ def receive_registration_data(request):
                                     status=400)
             else:
                 password = hash_password(password)
-                print(password)
                 user = User(username=username, email=email, password=password)
                 user.save()
                 return JsonResponse({'status': 'success',
@@ -104,7 +100,6 @@ def receive_login_data(request):
         iv = data.get('iv')
         username = decrypt(data.get('username'), key_hash, iv)
         password = decrypt(data.get('password'), key_hash, iv)
-        print(username, password)
         try:
             user = User.objects.get(username=username)
             is_correct = check_password(user.password, password)
@@ -206,8 +201,7 @@ def logout(request):
         else:
             return JsonResponse({'status': 'failed',
                                  'error': 'No session ID found in cookies'}, status=400)
-    else:
-        return JsonResponse({'status': 'failed',
+    return JsonResponse({'status': 'failed',
                              'error': 'Invalid request method'}, status=400)
 
 def index(request):
@@ -244,7 +238,6 @@ def receive_playlist_data(request):
         iv = data.get('iv')
         name = decrypt(data.get('name'), key_hash, iv)
         description = decrypt(data.get('description'), key_hash, iv)
-        print(name, description)
         if name and description:
             playlist = Playlist(name=name, description=description,
                                 is_default=False, owner=user)

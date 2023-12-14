@@ -36,9 +36,7 @@ async function validatePlaylist(){
     if(name !== '' && description !== ''){
         try {
             let sharedKey = await getSharedKey();
-            console.log('Key' + sharedKey);
             let {key, iv} = await convertKey(sharedKey);
-            // Encrypt the text
             await sendPlaylistData(name, description, key, iv);
         } catch(error) {
             console.error('An error occurred:', error);
@@ -251,7 +249,6 @@ function countSharedSecret(serverPublicKey, p, q) {
     while(publicKey === 1){
         privateKey = Math.floor(Math.random() * p);
         sharedSecret = modPow(serverPublicKey, privateKey, p);
-        // sharedSecret = 100;
         publicKey = modPow(q, privateKey, p);
     }
     console.log(p, q, privateKey, publicKey, sharedSecret);

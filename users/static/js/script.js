@@ -175,9 +175,7 @@ async function receiveServerPublicKey() {
 
 async function sendClientPublicKey(publicKey){
     let url = '/users/count-keys';
-    let data = {publicKey: publicKey}; // data to be sent to the server
-
-    // Send the data to the server
+    let data = {publicKey: publicKey};
     let response = await fetch(url, {
         method: 'POST', // or 'PUT'
         headers: {
@@ -185,11 +183,9 @@ async function sendClientPublicKey(publicKey){
         },
         body: JSON.stringify(data),
     });
-
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
-
     let responseData = await response.json();
     console.log('Success:', responseData);
 }
@@ -198,10 +194,8 @@ async function convertKey(secretKey){
     const encoder = new TextEncoder();
     const secretKeyBuffer = encoder.encode(secretKey);
 
-    // Hash the secret key
     const hashedKey = await window.crypto.subtle.digest('SHA-256', secretKeyBuffer);
 
-    // Import the hashed key as a CryptoKey
     const key = await window.crypto.subtle.importKey(
         'raw',
         hashedKey,
@@ -235,7 +229,6 @@ async function decrypt(text, key, iv){
         key,
         encryptedData.buffer
     );
-
     const decoded = new TextDecoder().decode(decryptedData);
     return decoded;
 }

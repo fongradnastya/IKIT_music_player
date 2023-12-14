@@ -29,7 +29,6 @@ class DiffieHellman:
     def compute_shared_secret(self, other_public_key):
         if self.private_key > 0 and self.p > 0:
             self.shared_secret = pow(other_public_key, self.private_key, self.p)
-            # self.shared_secret = 100
             print(self.p, self.q, self.private_key, self.public_key,
                   self.shared_secret)
             return self.shared_secret
@@ -50,25 +49,18 @@ def hash_key(secret_key):
 def encrypt(text, key, iv=None):
     # Convert the text to bytes
     data = text.encode()
-
     # Generate a random initialization vector (IV)
     iv = b64decode(iv) if iv else os.urandom(12)
-
     # Create a new AES-GCM cipher using the key
     cipher = Cipher(algorithms.AES(key), modes.GCM(iv),
                     backend=default_backend())
     encryptor = cipher.encryptor()
-
-    # Encrypt the data
     encrypted_data = encryptor.update(data) + encryptor.finalize()
-
     # Append the tag to the encrypted data
     encrypted_data_with_tag = encrypted_data + encryptor.tag
-
     # Convert the encrypted data with tag and IV to Base64 strings
     encrypted_data_with_tag_str = b64encode(encrypted_data_with_tag).decode()
     iv_str = b64encode(iv).decode()
-
     return encrypted_data_with_tag_str, iv_str
 
 
@@ -76,7 +68,6 @@ def decrypt(encrypted_text, key, iv):
     iv = b64decode(iv)
     # Decode the Base64 string back into bytes
     encrypted_data_with_tag = b64decode(encrypted_text)
-
     # Separate the encrypted data and the tag
     encrypted_data = encrypted_data_with_tag[:-16]
     tag = encrypted_data_with_tag[-16:]
@@ -103,7 +94,7 @@ def hash_password(password, salt=None):
         'sha256',  # The hash digest algorithm to use
         password.encode('utf-8'),  # Convert the password to bytes
         salt,  # Provide the salt
-        100000  # Recommended number of iterations for security
+        100000
     )
     return salt + key
 
@@ -117,7 +108,6 @@ def check_password(stored_password, entered_password):
     # Hash the entered password with the stored salt
     entered_hash = hash_password(entered_password, salt)
     print(entered_hash)
-    # Compare the entered hash with the stored hash
     return entered_hash == password_bytes
 
 def create_session_id(username):

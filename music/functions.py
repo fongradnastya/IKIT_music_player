@@ -1,18 +1,6 @@
 from .models import *
 
 
-"""def add_to_favorite():
-    playlist = Playlist.objects.get(id=5)
-    connects = PlaylistsCompositions.objects.filter(playlist=playlist)
-    for connect in PlaylistsCompositions.objects.all():
-        composition = connect.composition
-        if connect in connects:
-            composition.is_liked = True
-        else:
-            composition.is_liked = False
-        composition.save()"""
-
-
 def count_order(playlist, order):
     size = PlaylistsCompositions.objects.filter(playlist=playlist).count()
     if order > size:
